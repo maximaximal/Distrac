@@ -134,6 +134,30 @@ write_file_header(distrac* handle, FILE* tgt) {
   }
 }
 
+static void
+init_definition(distrac_definition* def) {
+  def->events = NULL;
+  def->event_headers = NULL;
+  def->property_headers = NULL;
+  def->source = "";
+  def->file_header.event_count = 0;
+  strcpy(def->file_header.metadata, "(No Metadata)");
+  strcpy(def->file_header.problem_name, "(No Problem Name)");
+  strcpy(def->file_header.additional_info, "(No Additional Info)");
+}
+
+static void
+init_definition_events(distrac_definition* def) {
+  def->events = calloc(sizeof(distrac_event), def->file_header.event_count);
+  for(uint8_t ev = 0; ev < def->file_header.event_count; ++ev) {
+    for(uint8_t prop = 0; prop < def->event_headers[ev].property_count;
+        ++prop) {
+      def->events[ev].size +=
+        distrac_type_sizeof(def->property_headers[ev][prop].datatype);
+    }
+  }
+}
+
 void
 distrac_init(distrac* handle,
              distrac_definition_function def_func,
@@ -156,29 +180,14 @@ distrac_init(distrac* handle,
 
   distrac_definition* def = &handle->definition;
 
-  def->events = NULL;
-  def->event_headers = NULL;
-  def->property_headers = NULL;
-  def->source = "";
-  def->file_header.event_count = 0;
-  strcpy(def->file_header.metadata, "(No Metadata)");
-  strcpy(def->file_header.problem_name, "(No Problem Name)");
-  strcpy(def->file_header.additional_info, "(No Additional Info)");
-
+  init_definition(def);
   def_func(def);
 
   assert(def->file_header.event_count > 0);
   assert(def->event_headers != NULL);
   assert(def->property_headers != NULL);
 
-  def->events = calloc(sizeof(distrac_event), def->file_header.event_count);
-  for(uint8_t ev = 0; ev < def->file_header.event_count; ++ev) {
-    for(uint8_t prop = 0; prop < def->event_headers[ev].property_count;
-        ++prop) {
-      def->events[ev].size +=
-        distrac_type_sizeof(def->property_headers[ev][prop].datatype);
-    }
-  }
+  init_definition_events(def);
 
   handle->internal =
     malloc(sizeof(distrac_internal) +
