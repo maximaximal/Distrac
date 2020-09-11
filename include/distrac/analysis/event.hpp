@@ -22,7 +22,7 @@ class event {
     else
       return 0;
   };
-  const distrac::property& property(size_t id) const;
+  const ::distrac::property& property(size_t id) const;
 
   const uint8_t* memory() const {
     if(valid())
@@ -35,6 +35,6 @@ class event {
   event_definition& _def;
   uint8_t* _src;
 
-  std::vector<distrac::property> _properties;
+  std::vector<::distrac::property> _properties;
 };
 }

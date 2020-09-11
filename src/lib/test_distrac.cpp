@@ -5,10 +5,11 @@
 #include <distrac/headers.h>
 #include <distrac/types.h>
 
-static distrac_event_header event_headers[] = { distrac_event_header{ 1 } };
+static distrac_event_header event_headers[] = { distrac_event_header{ "event1",
+                                                                      1 } };
 
 static distrac_property_header ev0_property_headers[]{
-  distrac_property_header{ DISTRAC_TYPE_INT16, false, 0, 0 }
+  distrac_property_header{ "prop1", DISTRAC_TYPE_INT16, false, 0, 0 }
 };
 
 static distrac_property_header* property_headers[]{ ev0_property_headers };
@@ -38,6 +39,7 @@ TEST_CASE("Distrac Push") {
     },
     "/dev/shm/",
     output_file,
+    0,
     "testbench",
     "distrac-test");
 

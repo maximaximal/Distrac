@@ -1,7 +1,7 @@
-#include <distrac/codegen/event.hpp>
-#include <distrac/codegen/event_definition.hpp>
-#include <distrac/codegen/property.hpp>
-#include <distrac/codegen/property_definition.hpp>
+#include <distrac/analysis/event.hpp>
+#include <distrac/analysis/event_definition.hpp>
+#include <distrac/analysis/property.hpp>
+#include <distrac/analysis/property_definition.hpp>
 
 namespace distrac {
 event::event(event_definition& def, uint8_t* src)

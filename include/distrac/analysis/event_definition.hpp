@@ -4,7 +4,10 @@
 #include <string>
 #include <vector>
 
+#include <distrac/headers.h>
+
 namespace distrac {
+
 class property_definition;
 
 class event_definition {
@@ -12,6 +15,7 @@ class event_definition {
   using property_definition_vector = std::vector<property_definition>;
 
   event_definition(const std::string& name);
+  event_definition(const distrac_event_header& header);
   ~event_definition();
 
   std::size_t property_size(std::size_t id) const;

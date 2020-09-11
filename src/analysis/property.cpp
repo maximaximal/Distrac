@@ -1,6 +1,6 @@
-#include "distrac/codegen/property_definition.hpp"
-#include <distrac/codegen/event.hpp>
-#include <distrac/codegen/property.hpp>
+#include "distrac/analysis/property_definition.hpp"
+#include <distrac/analysis/event.hpp>
+#include <distrac/analysis/property.hpp>
 
 namespace distrac {
 property::property(const distrac::event& event,

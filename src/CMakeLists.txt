@@ -14,10 +14,15 @@ set(DISTRAC_BIN_SRCS
 
 set(DISTRAC_CODEGEN_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen/parser.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/codegen/event_definition.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/codegen/property_definition.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/codegen/event.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/codegen/property.cpp
+    PARENT_SCOPE)
+
+set(DISTRAC_ANALYSIS_SRCS
+    ${CMAKE_CURRENT_SOURCE_DIR}/analysis/event_definition.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/analysis/property_definition.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/analysis/event.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/analysis/property.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/analysis/tracefile.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/analysis/node.cpp
     PARENT_SCOPE)
 
 set(DISTRAC_CODEGEN_BIN_SRCS

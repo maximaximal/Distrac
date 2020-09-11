@@ -16,6 +16,7 @@ typedef struct distrac_version {
 } distrac_version;
 
 typedef struct distrac_node_header {
+  int64_t node_id;
   char node_name[255];
   char program_name[255];
   distrac_version distrac_version;
@@ -23,18 +24,21 @@ typedef struct distrac_node_header {
 } distrac_node_header;
 
 typedef struct distrac_property_header {
+  char name[32];
   uint8_t datatype;
-  bool enable_after_constraint : 1;
+  bool enable_after_constraint;
   uint8_t after_event_id;
   uint8_t after_event_property;
 } distrac_property_header;
 
 typedef struct distrac_event_header {
+  char name[32];
   uint8_t property_count;
   // After property count follows the specified number of property headers.
 } distrac_event_header;
 
 typedef struct distrac_file_header {
+  uint32_t distrac_trace_file_signature_bytes;
   char problem_name[255];
   char additional_info[255];
   char metadata[255];

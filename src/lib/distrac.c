@@ -28,7 +28,7 @@ typedef struct distrac_internal {
 } distrac_internal;
 
 static void
-open_temp_files(distrac* handle, const char* mode) {
+open_temp_files(distrac_handle* handle, const char* mode) {
   assert(handle);
   assert(handle->working_directory);
 
@@ -47,7 +47,7 @@ open_temp_files(distrac* handle, const char* mode) {
 }
 
 static void
-close_temp_files(distrac* handle) {
+close_temp_files(distrac_handle* handle) {
   assert(handle);
 
   for(int i = 0; i < handle->definition.file_header.event_count; ++i) {
@@ -70,7 +70,7 @@ append_file(FILE* src, FILE* tgt) {
   int src_fileno = fileno(src);
   assert(src_fileno != -1);
 
-  size_t bytes_sent = 0;
+  off_t bytes_sent = 0;
 
   while(bytes_sent < src_size) {
     ssize_t sent = sendfile(tgt_fileno, src_fileno, &bytes_sent, src_size);
@@ -79,7 +79,7 @@ append_file(FILE* src, FILE* tgt) {
 }
 
 static void
-append_events(distrac* handle, uint8_t event, FILE* tgt) {
+append_events(distrac_handle* handle, uint8_t event, FILE* tgt) {
   assert(handle);
   assert(handle->internal);
   assert(event < handle->definition.file_header.event_count);
@@ -90,7 +90,7 @@ append_events(distrac* handle, uint8_t event, FILE* tgt) {
 }
 
 static void
-remove_temp_files(distrac* handle) {
+remove_temp_files(distrac_handle* handle) {
   assert(handle);
   assert(handle->working_directory);
 
@@ -114,24 +114,44 @@ compute_time_diff_ns(struct timespec oldtime, struct timespec newtime) {
   return diff_ns;
 }
 
-static void
-write_file_header(distrac* handle, FILE* tgt) {
+static size_t
+add_8byte_padding(size_t pos, FILE* file) {
+  size_t align_offset = pos & 0b00000111;
+  size_t required_buffer_bytes = 8 - align_offset;
+  uint8_t buffer_bytes[required_buffer_bytes];
+  memset(buffer_bytes, 0, sizeof(uint8_t) * required_buffer_bytes);
+  size_t wrote = fwrite(buffer_bytes, required_buffer_bytes, 1, file) *
+                 required_buffer_bytes;
+  assert(((pos + wrote) & 0b00000111) == 0);
+  return wrote;
+}
+
+static size_t
+write_file_header(distrac_handle* handle, FILE* tgt) {
   assert(handle);
 
-  fwrite(&handle->definition.file_header,
-         sizeof(handle->definition.file_header),
-         1,
-         tgt);
+  size_t wrote = 0;
+
+  wrote += fwrite(&handle->definition.file_header,
+                  sizeof(handle->definition.file_header),
+                  1,
+                  tgt) *
+           sizeof(handle->definition.file_header);
 
   for(uint8_t ev = 0; ev < handle->definition.file_header.event_count; ++ev) {
     distrac_event_header* ev_header = handle->definition.event_headers + ev;
-    fwrite(ev_header, sizeof(*ev_header), 1, tgt);
+    wrote += fwrite(ev_header, sizeof(*ev_header), 1, tgt) * sizeof(*ev_header);
 
-    fwrite(handle->definition.property_headers[ev],
-           sizeof(distrac_property_header),
-           ev_header->property_count,
-           tgt);
+    size_t written_properties = fwrite(handle->definition.property_headers[ev],
+                                       sizeof(distrac_property_header),
+                                       ev_header->property_count,
+                                       tgt);
+
+    assert(written_properties == ev_header->property_count);
+    wrote += written_properties * sizeof(distrac_property_header);
   }
+
+  return wrote;
 }
 
 static void
@@ -159,10 +179,11 @@ init_definition_events(distrac_definition* def) {
 }
 
 void
-distrac_init(distrac* handle,
+distrac_init(distrac_handle* handle,
              distrac_definition_function def_func,
              const char* working_directory,
              const char* output_path,
+             distrac_id node_id,
              const char* node_name,
              const char* program_name) {
   assert(handle);
@@ -177,6 +198,9 @@ distrac_init(distrac* handle,
   assert(strlen(program_name) < 255);
   strcpy(handle->definition.node_header.node_name, node_name);
   strcpy(handle->definition.node_header.program_name, program_name);
+  handle->definition.node_header.node_id = node_id;
+  handle->definition.file_header.distrac_trace_file_signature_bytes =
+    DISTRAC_FILE_SIGNATURE;
 
   distrac_definition* def = &handle->definition;
 
@@ -207,7 +231,7 @@ distrac_init(distrac* handle,
 }
 
 void
-distrac_push(distrac* handle, void* event, uint8_t event_type) {
+distrac_push(distrac_handle* handle, void* event, uint8_t event_type) {
   assert(handle);
   assert(handle->internal);
   assert(event);
@@ -238,7 +262,7 @@ distrac_push(distrac* handle, void* event, uint8_t event_type) {
 }
 
 void
-distrac_finalize(distrac* handle, int64_t offset_ns) {
+distrac_finalize(distrac_handle* handle, int64_t offset_ns) {
   assert(handle);
   distrac_definition* def = &handle->definition;
   assert(def);
@@ -254,18 +278,28 @@ distrac_finalize(distrac* handle, int64_t offset_ns) {
   FILE* outfile = fopen(handle->output_path, "w");
   assert(outfile);
 
+  size_t filepos = 0;
+
   if(handle->is_main_node) {
-    write_file_header(handle, outfile);
+    filepos += write_file_header(handle, outfile);
   }
 
-  fwrite(
-    &handle->definition.node_header, sizeof(distrac_node_header), 1, outfile);
+  filepos += add_8byte_padding(filepos, outfile);
+
+  filepos += fwrite(&handle->definition.node_header,
+                    sizeof(distrac_node_header),
+                    1,
+                    outfile) *
+             sizeof(distrac_node_header);
 
   uint64_t event_counts[def->file_header.event_count];
   for(uint8_t i = 0; i < def->file_header.event_count; ++i) {
     event_counts[i] = handle->definition.events[i].count;
   }
-  fwrite(event_counts, sizeof(uint64_t), def->file_header.event_count, outfile);
+  filepos +=
+    fwrite(
+      event_counts, sizeof(uint64_t), def->file_header.event_count, outfile) *
+    sizeof(uint64_t);
 
   fflush(outfile);
 
@@ -274,12 +308,15 @@ distrac_finalize(distrac* handle, int64_t offset_ns) {
     append_events(handle, i, outfile);
   }
 
+  fflush(outfile);
+  fclose(outfile);
+
   close_temp_files(handle);
   remove_temp_files(handle);
 }
 
 void
-distrac_destroy(distrac* handle) {
+distrac_destroy(distrac_handle* handle) {
   assert(handle);
   assert(handle->internal);
 

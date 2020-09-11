@@ -32,6 +32,8 @@ typedef struct distrac_ipv6 {
   uint8_t segments[16];
 } distrac_ipv6;
 
+typedef int64_t distrac_id;
+
 const char*
 distrac_type_to_str(enum distrac_type type);
 
@@ -74,6 +76,12 @@ distrac_memory_to_type(const uint8_t* mem,
     case DISTRAC_TYPE_BOOL:
       return func(*reinterpret_cast<const uint8_t*>(mem));
   }
+}
+
+#include <ostream>
+inline std::ostream&
+operator<<(std::ostream& o, const distrac_type t) {
+  return o << distrac_type_to_str(t);
 }
 
 #if __cplusplus >= 201703L
