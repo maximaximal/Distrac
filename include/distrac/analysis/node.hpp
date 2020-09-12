@@ -8,6 +8,8 @@
 
 namespace distrac {
 class tracefile;
+class event_iterator;
+class event;
 
 class node {
   public:
@@ -24,6 +26,11 @@ class node {
 
   size_t event_count(uint8_t ev) const { return _event_counts.at(ev); }
 
+  const uint8_t* get_event_memory(uint8_t event, uint64_t number) const;
+
+  event_iterator begin() const;
+  event_iterator end() const;
+
   private:
   const distrac_node_header& _header;
   distrac_id _id;
@@ -35,7 +42,7 @@ class node {
   size_t _following_size;
 
   std::vector<uint64_t> _event_counts;
-  std::vector<const uint8_t*> _event_offsets;
+  std::vector<const uint8_t*> _event_memory_locations;
 
   size_t compute_following_size();
 

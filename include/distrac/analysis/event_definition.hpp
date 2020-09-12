@@ -14,8 +14,8 @@ class event_definition {
   public:
   using property_definition_vector = std::vector<property_definition>;
 
-  event_definition(const std::string& name);
-  event_definition(const distrac_event_header& header);
+  event_definition(const std::string& name, uint8_t id);
+  event_definition(const distrac_event_header& header, uint8_t id);
   ~event_definition();
 
   std::size_t property_size(std::size_t id) const;
@@ -30,10 +30,12 @@ class event_definition {
 
   const std::string& name() const { return _name; }
   std::size_t size() const { return _size; }
+  uint8_t id() const { return _id; }
 
   private:
   property_definition_vector _defs;
-  std::string _name;
+  const std::string _name;
   std::size_t _size = 0;
+  const uint8_t _id;
 };
 }

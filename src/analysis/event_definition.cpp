@@ -6,11 +6,14 @@
 
 namespace distrac {
 DISTRAC_ANALYSIS_EXPORT
-event_definition::event_definition(const std::string& name)
-  : _name(name) {}
+event_definition::event_definition(const std::string& name, uint8_t id)
+  : _name(name)
+  , _id(id) {}
 DISTRAC_ANALYSIS_EXPORT
-event_definition::event_definition(const distrac_event_header& header)
-  : _name(header.name) {
+event_definition::event_definition(const distrac_event_header& header,
+                                   uint8_t id)
+  : _name(header.name)
+  , _id(id) {
   _defs.reserve(header.property_count);
 }
 DISTRAC_ANALYSIS_EXPORT event_definition::~event_definition() {}

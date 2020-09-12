@@ -6,6 +6,7 @@
 #include <distrac/analysis/property_definition.hpp>
 #include <distrac/analysis/tracefile.hpp>
 #include <distrac/analysis/util.hpp>
+#include <distrac/analysis/event_iterator.hpp>
 
 #include <iostream>
 
@@ -59,6 +60,10 @@ tracefile::print_summary() {
       cout << "      " << node.event_count(ev) << " "
            << _event_definitions[ev].name() << " events" << endl;
     }
+    cout << "      Events:" << endl;
+    for(auto &ev : node) {
+      cout << "Ev: " << ev.number() << " at " << ev.timestamp_with_offset() << " of type " << (int)ev.id() << endl;
+    }
   }
 }
 
@@ -84,11 +89,11 @@ tracefile::scan() {
   for(uint8_t ev = 0; ev < _header->event_count; ++ev) {
     const auto& ev_header = read_struct<distrac_event_header>(pos);
 
-    event_definition ev_definition{ ev_header };
+    event_definition ev_definition{ ev_header, ev };
 
     for(uint8_t prop = 0; prop < ev_header.property_count; ++prop) {
       const auto& prop_header = read_struct<distrac_property_header>(pos);
-      ev_definition.add_property_definition(property_definition{ prop_header });
+      ev_definition.add_property_definition(property_definition{ prop_header, prop });
     }
 
     _event_definitions.push_back(std::move(ev_definition));

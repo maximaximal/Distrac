@@ -1,39 +1,72 @@
 #pragma once
 
+#include <distrac/types.h>
+
 #include <cstdint>
 #include <vector>
 
 namespace distrac {
+class node;
 class property;
 class event_definition;
 
 class event {
   public:
-  event(event_definition& def, uint8_t* src = nullptr);
+  event(const event_definition& def,
+        const distrac::node& node,
+        uint64_t number = 0);
+  event(const event& ev);
   ~event();
 
   void init_properties();
 
-  bool valid() const { return _src != nullptr; };
+  uint64_t number() const { return _number; }
+
+  bool valid() const { return valid(_number); };
+  bool valid(uint64_t number) const;
+  uint8_t id() const;
+  distrac_id node_id() const;
+
+  void set_number(uint64_t number) const { _number = number; }
 
   int64_t timestamp() const {
     if(valid())
-      return *reinterpret_cast<int64_t*>(_src);
+      return *reinterpret_cast<const int64_t*>(memory());
     else
       return 0;
   };
+  int64_t timestamp_with_offset() const;
+
   const ::distrac::property& property(size_t id) const;
 
-  const uint8_t* memory() const {
-    if(valid())
-      return _src + sizeof(timestamp());
+  const uint8_t* properties_memory(uint64_t number) const {
+    if(valid(number))
+      return memory(number) + sizeof(timestamp());
     else
       return nullptr;
   };
+  const uint8_t* properties_memory() const {
+    return properties_memory(_number);
+  };
+
+  const ::distrac::node& node() const { return _node; }
+  const uint8_t* memory() const { return memory(_number); }
+  const uint8_t* memory(uint64_t number) const;
+
+  bool operator<(const event& rhs) const {
+    return id() < rhs.id() && node_id() < rhs.node_id();
+  }
+  void operator++() const { ++_number; }
+  bool operator==(const event& rhs) const {
+    return _number == rhs._number && id() == rhs.id() &&
+           node_id() == rhs.node_id();
+  }
 
   private:
-  event_definition& _def;
-  uint8_t* _src;
+  const event_definition& _def;
+  const ::distrac::node& _node;
+
+  mutable uint64_t _number;
 
   std::vector<::distrac::property> _properties;
 };
