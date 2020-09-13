@@ -53,7 +53,8 @@ tracefile::print_summary() {
   }
   cout << "  Events:" << endl;
   for(auto& ev : _event_definitions) {
-    cout << "    Event " << ev.name() << ":" << endl;
+    cout << "    Event " << ev.name() << " (encountered "
+         << event_count(ev.id()) << "x):" << endl;
     for(auto& prop : ev.definitions()) {
       cout << "      Property " << prop.name() << " : " << prop.type() << endl;
     }
@@ -127,6 +128,15 @@ tracefile::assert_size_left(size_t pos, size_t size, const char* structname) {
               << ". Exiting." << std::endl;
     exit(EXIT_FAILURE);
   }
+}
+
+size_t
+tracefile::event_count(uint8_t ev) const {
+  size_t count = 0;
+  for(const auto& node : _nodes) {
+    count += node.event_count(ev);
+  }
+  return count;
 }
 
 event_iterator

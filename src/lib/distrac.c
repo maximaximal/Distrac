@@ -177,8 +177,7 @@ init_definition_events(distrac_definition* def) {
       def->events[ev].size +=
         distrac_type_sizeof(def->property_headers[ev][prop].datatype);
     }
-    // All events must be 8 byte aligned.
-    assert((def->events[ev].size & 0b00000111) == 0);
+    assert((def->events[ev].size & 0b00000111) == 0 && "All events must be 8 byte aligned");
   }
 }
 

@@ -84,6 +84,8 @@ class tracefile {
     event_iterator end() const;
   };
 
+  size_t event_count(uint8_t ev) const;
+
   filtered_tracefile filtered(event_filter_func func) const;
   filtered_tracefile filtered(event_filter_set event_ids) const;
 
