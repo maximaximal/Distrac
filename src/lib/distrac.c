@@ -11,6 +11,7 @@
 
 #include <distrac/distrac.h>
 #include <distrac/types.h>
+#include <unistd.h>
 
 #ifdef __STDC_NO_THREADS__
 // C11 Threads not available, using c11threads from
@@ -164,6 +165,7 @@ init_definition(distrac_definition* def) {
   strcpy(def->file_header.metadata, "(No Metadata)");
   strcpy(def->file_header.problem_name, "(No Problem Name)");
   strcpy(def->file_header.additional_info, "(No Additional Info)");
+  gethostname(def->node_header.node_hostname, 255);
 }
 
 static void
@@ -175,6 +177,8 @@ init_definition_events(distrac_definition* def) {
       def->events[ev].size +=
         distrac_type_sizeof(def->property_headers[ev][prop].datatype);
     }
+    // All events must be 8 byte aligned.
+    assert((def->events[ev].size & 0b00000111) == 0);
   }
 }
 
@@ -226,6 +230,13 @@ distrac_init(distrac_handle* handle,
   open_temp_files(handle, "a");
 
   clock_gettime(CLOCK_MONOTONIC, &handle->internal->init_time);
+
+  {
+    struct timespec real_time;
+    clock_gettime(CLOCK_REALTIME, &real_time);
+    handle->definition.file_header.seconds_since_epoch_on_start =
+      real_time.tv_sec;
+  }
 
   atomic_store(&handle->internal->pushable, true);
 }

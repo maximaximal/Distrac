@@ -3,11 +3,13 @@
 #include "distrac/types.h"
 
 #include <distrac/analysis/event_definition.hpp>
+#include <distrac/analysis/event_iterator.hpp>
 #include <distrac/analysis/property_definition.hpp>
 #include <distrac/analysis/tracefile.hpp>
 #include <distrac/analysis/util.hpp>
-#include <distrac/analysis/event_iterator.hpp>
 
+#include <forward_list>
+#include <iomanip>
 #include <iostream>
 
 using std::cerr;
@@ -44,6 +46,11 @@ tracefile::print_summary() {
   cout << "  Problem Name: " << _header->problem_name << endl;
   cout << "  Additional Info: " << _header->additional_info << endl;
   cout << "  Metadata: " << _header->metadata << endl;
+  {
+    auto time = trace_time();
+    cout << "  Start Time: " << std::put_time(std::localtime(&time), "%F %T%z")
+         << endl;
+  }
   cout << "  Events:" << endl;
   for(auto& ev : _event_definitions) {
     cout << "    Event " << ev.name() << ":" << endl;
@@ -53,16 +60,14 @@ tracefile::print_summary() {
   }
   cout << "  Nodes:" << endl;
   for(auto& node : _nodes) {
-    cout << "    Node " << node.name() << ":" << endl;
+    cout << "    Node " << node.name() << " (Hostname: " << node.hostname()
+         << "):" << endl;
     cout << "      Program: " << node.program() << endl;
     cout << "      Offset: " << node.offset_ns() << endl;
+    cout << "      ID: " << node.id() << endl;
     for(uint8_t ev = 0; ev < _event_definitions.size(); ++ev) {
       cout << "      " << node.event_count(ev) << " "
            << _event_definitions[ev].name() << " events" << endl;
-    }
-    cout << "      Events:" << endl;
-    for(auto &ev : node) {
-      cout << "Ev: " << ev.number() << " at " << ev.timestamp_with_offset() << " of type " << (int)ev.id() << endl;
     }
   }
 }
@@ -93,7 +98,8 @@ tracefile::scan() {
 
     for(uint8_t prop = 0; prop < ev_header.property_count; ++prop) {
       const auto& prop_header = read_struct<distrac_property_header>(pos);
-      ev_definition.add_property_definition(property_definition{ prop_header, prop });
+      ev_definition.add_property_definition(
+        property_definition{ prop_header, prop });
     }
 
     _event_definitions.push_back(std::move(ev_definition));
@@ -105,7 +111,7 @@ tracefile::scan() {
     const distrac_node_header& node_header =
       read_struct<distrac_node_header>(pos);
 
-    node n{ node_header, *this };
+    node n{ node_header, *this, _nodes.size() };
 
     pos += n.following_size();
 
@@ -122,4 +128,60 @@ tracefile::assert_size_left(size_t pos, size_t size, const char* structname) {
     exit(EXIT_FAILURE);
   }
 }
+
+event_iterator
+tracefile::begin() const {
+  event_iterator it;
+
+  std::forward_list<event> filtered_events;
+
+  for(auto& node : _nodes) {
+    auto events = node.begin().events();
+    std::copy(
+      events.begin(), events.end(), std::front_inserter(filtered_events));
+  }
+
+  it.add_events(std::begin(filtered_events), std::end(filtered_events));
+
+  return it;
+}
+
+event_iterator
+tracefile::end() const {
+  return event_iterator();
+}
+
+tracefile::filtered_tracefile
+tracefile::filtered(event_filter_func func) const {
+  return filtered_tracefile{ func, *this };
+}
+tracefile::filtered_tracefile
+tracefile::filtered(std::set<uint8_t> event_ids) const {
+  return filtered_tracefile{
+    [event_ids](const event& ev) { return event_ids.count(ev.id()); }, *this
+  };
+}
+
+event_iterator
+tracefile::filtered_tracefile::begin() const {
+  event_iterator it;
+
+  std::forward_list<event> filtered_events;
+
+  for(auto& node : trace._nodes) {
+    auto events = node.begin().events();
+    std::copy_if(
+      events.begin(), events.end(), std::front_inserter(filtered_events), func);
+  }
+
+  it.add_events(std::begin(filtered_events), std::end(filtered_events));
+
+  return it;
+}
+
+event_iterator
+tracefile::filtered_tracefile::end() const {
+  return event_iterator();
+}
+
 }

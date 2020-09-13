@@ -15,6 +15,7 @@ class event_iterator {
   typedef const event* pointer;
   typedef std::forward_iterator_tag iterator_category;
   typedef size_t difference_type;
+  typedef std::forward_list<event> event_list;
 
   event_iterator() {}
   template<typename Iter>
@@ -34,6 +35,8 @@ class event_iterator {
     ++_event_count;
     recompute_current_event();
   }
+
+  const event_list& events() const { return _events; }
 
   size_t event_count() const { return _event_count; }
 
@@ -92,6 +95,14 @@ class event_iterator {
   }
   pointer operator->() { return &(**this); }
 
+  event_iterator operator+(size_t i) {
+    self_type it = *this;
+    for(size_t j = 0; j < i; ++j) {
+      ++it;
+    }
+    return it;
+  }
+
   bool operator==(const self_type& rhs) const {
     if(_current_event == rhs._current_event)
       return true;
@@ -100,12 +111,13 @@ class event_iterator {
 
     return *_current_event == *(rhs._current_event) &&
            event_count() == rhs.event_count() &&
-           _current_event->number() == rhs._current_event->number();
+           _current_event->number() == rhs._current_event->number() &&
+           _current_event->node_id() == rhs._current_event->node_id();
   }
   bool operator!=(const self_type& rhs) const { return !(*this == rhs); }
 
   private:
-  std::forward_list<event> _events;
+  event_list _events;
   size_t _event_count = 0;
   const event* _current_event = nullptr;
 };

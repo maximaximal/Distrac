@@ -36,8 +36,12 @@ file_exists(const char* filename) {
 
 TEST_CASE("Distrac Push") {
   const char* output_file = "/dev/shm/distrac-tests-out";
+  const char* output_file2 = "/dev/shm/distrac-tests-out2";
   if(file_exists(output_file)) {
     remove(output_file);
+  }
+  if(file_exists(output_file2)) {
+    remove(output_file2);
   }
 
   distrac_wrapper handle(
@@ -49,7 +53,7 @@ TEST_CASE("Distrac Push") {
     },
     "/dev/shm/",
     output_file,
-    0,
+    1,
     "testbench",
     "distrac-test");
 
@@ -73,4 +77,36 @@ TEST_CASE("Distrac Push") {
   }
 
   distrac_finalize(&handle, 0);
+
+  distrac_wrapper handle2 = distrac_wrapper(
+    [](distrac_definition* def) {
+      def->source = "";
+      def->file_header.event_count = 2;
+      def->event_headers = event_headers;
+      def->property_headers = property_headers;
+    },
+    "/dev/shm/",
+    output_file2,
+    2,
+    "testbench-2",
+    "distrac-test-2");
+
+  distrac_push(&handle2, ev, 0);
+  distrac_push(&handle2, ev, 1);
+  distrac_push(&handle2, ev, 0);
+  distrac_push(&handle2, ev, 1);
+
+  std::random_device rd;
+  std::mt19937_64 e2(rd());
+  std::uniform_int_distribution<int64_t> dist(std::llround(std::pow(2, 61)),
+                                              std::llround(std::pow(2, 62)));
+
+  int64_t* ev_int64 = reinterpret_cast<int64_t*>(ev);
+  *ev_int64 = 0;
+  for(size_t i = 0; i < 1'000'000; ++i) {
+    *ev_int64 = dist(e2);
+    distrac_push(&handle2, ev, 1);
+  }
+
+  distrac_finalize(&handle2, 10);
 }

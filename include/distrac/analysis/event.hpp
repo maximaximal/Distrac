@@ -26,6 +26,7 @@ class event {
   bool valid(uint64_t number) const;
   uint8_t id() const;
   distrac_id node_id() const;
+  size_t node_tracefile_location_index() const;
 
   void set_number(uint64_t number) const { _number = number; }
 
@@ -59,7 +60,9 @@ class event {
   void operator++() const { ++_number; }
   bool operator==(const event& rhs) const {
     return _number == rhs._number && id() == rhs.id() &&
-           node_id() == rhs.node_id();
+           node_id() == rhs.node_id() &&
+           node_tracefile_location_index() ==
+             rhs.node_tracefile_location_index();
   }
 
   private:

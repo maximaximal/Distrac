@@ -50,6 +50,11 @@ event::node_id() const {
   return _node.id();
 }
 
+size_t
+event::node_tracefile_location_index() const {
+  return _node.tracefile_location_index();
+}
+
 const uint8_t*
 event::memory(uint64_t number) const {
   return _node.get_event_memory(_def.id(), number);

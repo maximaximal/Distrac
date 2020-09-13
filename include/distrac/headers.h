@@ -18,6 +18,7 @@ typedef struct distrac_version {
 typedef struct distrac_node_header {
   int64_t node_id;
   char node_name[255];
+  char node_hostname[255];
   char program_name[255];
   distrac_version distrac_version;
   int64_t offset_ns;
@@ -42,6 +43,7 @@ typedef struct distrac_file_header {
   char problem_name[255];
   char additional_info[255];
   char metadata[255];
+  uint64_t seconds_since_epoch_on_start;
   uint8_t event_count;
   // After event count follows the specified number of event headers.
 } distrac_file_header;

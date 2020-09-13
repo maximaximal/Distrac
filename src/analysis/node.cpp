@@ -8,10 +8,14 @@
 #include <distrac/analysis/event_iterator.hpp>
 
 namespace distrac {
-node::node(const distrac_node_header& header, const tracefile& trace)
+node::node(const distrac_node_header& header,
+           const tracefile& trace,
+           size_t tracefile_location_index)
   : _header(header)
   , _id(header.node_id)
+  , _tracefile_location_index(tracefile_location_index)
   , _name(header.node_name)
+  , _hostname(header.node_hostname)
   , _program(header.program_name)
   , _distrac_verion(header.distrac_version)
   , _offset_ns(header.offset_ns)
