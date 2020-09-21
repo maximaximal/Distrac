@@ -132,7 +132,8 @@ parser::generate_definition(const parser_def::definition& def) {
       return parser_error{ "Event \"" + ev.name + "\" has a too long name!" };
     }
     if(ev.description.size() > DISTRAC_DESCRIPTION_LENGTH) {
-      return parser_error{ "Event \"" + ev.name + "\" has a too long description!" };
+      return parser_error{ "Event \"" + ev.name +
+                           "\" has a too long description!" };
     }
 
     event_definition ev_def(ev.name, ev_id++, ev.description);
@@ -161,6 +162,10 @@ parser::generate_definition(const parser_def::definition& def) {
                              "\" is not properly aligned for its type!" };
       }
       ev_def.add_property_definition(prop_def);
+    }
+    if((ev_def.size() & 0b00000111) != 0) {
+      return parser_error{ "Event \"" + ev.name +
+                           "\" must have a size that is multiple of 8 bytes!" };
     }
     out_def.add_definition(ev_def);
   }
