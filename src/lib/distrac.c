@@ -165,6 +165,7 @@ init_definition(distrac_definition* def) {
   strcpy(def->file_header.metadata, "(No Metadata)");
   strcpy(def->file_header.problem_name, "(No Problem Name)");
   strcpy(def->file_header.additional_info, "(No Additional Info)");
+  strcpy(def->file_header.distrac_description, "(No Distrac Description)");
   gethostname(def->node_header.node_hostname, 255);
 }
 

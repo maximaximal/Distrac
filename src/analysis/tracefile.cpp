@@ -48,6 +48,7 @@ tracefile::print_summary() {
   cout << "  Problem Name: " << _header->problem_name << endl;
   cout << "  Additional Info: " << _header->additional_info << endl;
   cout << "  Metadata: " << _header->metadata << endl;
+  cout << "  DisTrac Description: " << _header->distrac_description << endl;
   {
     auto time = trace_time();
     cout << "  Start Time: " << std::put_time(std::localtime(&time), "%F %T%z")
