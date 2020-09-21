@@ -122,6 +122,7 @@ set_target_properties(distrac-bin
 target_link_libraries(distrac-bin Boost::program_options Boost::filesystem Threads::Threads distrac-analysis)
 
 add_executable(distrac-codegen-bin ${DISTRAC_CODEGEN_BIN_SRCS})
+set_property(TARGET distrac-codegen-bin PROPERTY CXX_STANDARD 17)
 set_target_properties(distrac-codegen-bin
     PROPERTIES OUTPUT_NAME distrac-codegen)
 target_link_libraries(distrac-codegen-bin Boost::program_options Boost::filesystem Threads::Threads distrac-codegen distrac-analysis)

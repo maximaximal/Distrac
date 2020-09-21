@@ -7,6 +7,8 @@
 #include <distrac/types.h>
 
 namespace distrac {
+class event_definition;
+
 class property_definition {
   public:
   property_definition(const std::string& name, distrac_type type, uint8_t id)
@@ -23,6 +25,9 @@ class property_definition {
   distrac_type type() const { return _type; }
   std::size_t size() const { return distrac_type_sizeof(_type); }
   uint8_t id() const { return _id; }
+
+  size_t offset(const event_definition& ev) const;
+  bool is_correctly_aligned(const event_definition& ev) const;
 
   private:
   std::string _name;

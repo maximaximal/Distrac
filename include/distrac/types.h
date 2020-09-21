@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 
+#include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -22,6 +23,7 @@ enum distrac_type {
   DISTRAC_TYPE_DOUBLE,
   DISTRAC_TYPE_FLOAT,
   DISTRAC_TYPE_BOOL,
+  DISTRAC_TYPE__COUNT
 };
 
 typedef struct distrac_ipv4 {
@@ -39,6 +41,10 @@ distrac_type_to_str(enum distrac_type type);
 
 size_t
 distrac_type_sizeof(enum distrac_type type);
+
+// Either 0, 1, 2 or 3. Specifies the shift count.
+size_t
+distrac_type_required_padding(enum distrac_type type);
 
 #ifdef __cplusplus
 }
@@ -75,6 +81,9 @@ distrac_memory_to_type(const uint8_t* mem,
       return func(*reinterpret_cast<const float*>(mem));
     case DISTRAC_TYPE_BOOL:
       return func(*reinterpret_cast<const uint8_t*>(mem));
+
+    case DISTRAC_TYPE__COUNT:
+      assert(false);
   }
 }
 

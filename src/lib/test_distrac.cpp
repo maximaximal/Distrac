@@ -6,8 +6,8 @@
 #include <distrac/types.h>
 
 static distrac_event_header event_headers[] = {
-  distrac_event_header{ "event1", 3 },
-  distrac_event_header{ "event2", 3 }
+  distrac_event_header{ "event1", "", 3 },
+  distrac_event_header{ "event2", "", 3 }
 };
 
 static distrac_property_header ev0_property_headers[]{

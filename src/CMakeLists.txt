@@ -17,6 +17,7 @@ set(DISTRAC_CODEGEN_SRCS
     PARENT_SCOPE)
 
 set(DISTRAC_ANALYSIS_SRCS
+    ${CMAKE_CURRENT_SOURCE_DIR}/analysis/definition.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/analysis/event_definition.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/analysis/property_definition.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/analysis/event.cpp

@@ -2,6 +2,7 @@
 #include "distrac/headers.h"
 #include "distrac/types.h"
 
+#include <distrac/analysis/definition.hpp>
 #include <distrac/analysis/event_definition.hpp>
 #include <distrac/analysis/event_iterator.hpp>
 #include <distrac/analysis/property_definition.hpp>
@@ -19,7 +20,8 @@ using std::endl;
 
 namespace distrac {
 tracefile::tracefile(const std::string& path)
-  : _path(path) {
+  : _path(path)
+  , _definition("Parsed from tracefile " + path) {
   _sink.open(path);
   if(!_sink.is_open()) {
     std::cerr << "!! Could not open file as memory mapped file!" << std::endl;
@@ -52,7 +54,7 @@ tracefile::print_summary() {
          << endl;
   }
   cout << "  Events:" << endl;
-  for(auto& ev : _event_definitions) {
+  for(auto& ev : event_definitions()) {
     cout << "    Event " << ev.name() << " (encountered "
          << event_count(ev.id()) << "x):" << endl;
     for(auto& prop : ev.definitions()) {
@@ -66,11 +68,16 @@ tracefile::print_summary() {
     cout << "      Program: " << node.program() << endl;
     cout << "      Offset: " << node.offset_ns() << endl;
     cout << "      ID: " << node.id() << endl;
-    for(uint8_t ev = 0; ev < _event_definitions.size(); ++ev) {
+    for(uint8_t ev = 0; ev < event_definitions().size(); ++ev) {
       cout << "      " << node.event_count(ev) << " "
-           << _event_definitions[ev].name() << " events" << endl;
+           << event_definitions()[ev].name() << " events" << endl;
     }
   }
+}
+
+const tracefile::event_definition_vector&
+tracefile::event_definitions() const {
+  return _definition.definitions();
 }
 
 void
@@ -84,12 +91,13 @@ tracefile::scan() {
 
   if(_header->distrac_trace_file_signature_bytes != DISTRAC_FILE_SIGNATURE) {
     std::cerr
-      << "!! File does not have distrac signature bytes at the beginning!"
+      << "!! File does not have distrac file signature bytes at the beginning!"
       << std::endl;
+
     exit(EXIT_FAILURE);
   }
 
-  _event_definitions.reserve(_header->event_count);
+  _definition.reserve(_header->event_count);
 
   // Parse event and property headers.
   for(uint8_t ev = 0; ev < _header->event_count; ++ev) {
@@ -103,7 +111,7 @@ tracefile::scan() {
         property_definition{ prop_header, prop });
     }
 
-    _event_definitions.push_back(std::move(ev_definition));
+    _definition.add_definition(ev_definition);
   }
 
   // Parse nodes and event data.

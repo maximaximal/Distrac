@@ -8,6 +8,10 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 
+#define DISTRAC_NAME_LENGTH 32
+#define DISTRAC_LONGNAME_LENGTH 255
+#define DISTRAC_DESCRIPTION_LENGTH 255
+
 typedef struct distrac_version {
   uint8_t major;
   uint8_t minor;
@@ -17,15 +21,15 @@ typedef struct distrac_version {
 
 typedef struct distrac_node_header {
   int64_t node_id;
-  char node_name[255];
-  char node_hostname[255];
-  char program_name[255];
+  char node_name[DISTRAC_LONGNAME_LENGTH];
+  char node_hostname[DISTRAC_LONGNAME_LENGTH];
+  char program_name[DISTRAC_LONGNAME_LENGTH];
   distrac_version distrac_version;
   int64_t offset_ns;
 } distrac_node_header;
 
 typedef struct distrac_property_header {
-  char name[32];
+  char name[DISTRAC_NAME_LENGTH];
   uint8_t datatype;
   bool enable_after_constraint;
   uint8_t after_event_id;
@@ -33,16 +37,18 @@ typedef struct distrac_property_header {
 } distrac_property_header;
 
 typedef struct distrac_event_header {
-  char name[32];
+  char name[DISTRAC_NAME_LENGTH];
+  char description[DISTRAC_LONGNAME_LENGTH];
   uint8_t property_count;
   // After property count follows the specified number of property headers.
 } distrac_event_header;
 
 typedef struct distrac_file_header {
   uint32_t distrac_trace_file_signature_bytes;
-  char problem_name[255];
-  char additional_info[255];
-  char metadata[255];
+  char problem_name[DISTRAC_LONGNAME_LENGTH];
+  char additional_info[DISTRAC_DESCRIPTION_LENGTH];
+  char metadata[DISTRAC_DESCRIPTION_LENGTH];
+  char distrac_description[DISTRAC_DESCRIPTION_LENGTH];
   uint64_t seconds_since_epoch_on_start;
   uint8_t event_count;
   // After event count follows the specified number of event headers.

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -13,8 +14,9 @@ class property_definition;
 class event_definition {
   public:
   using property_definition_vector = std::vector<property_definition>;
+  using property_definition_map = std::map<std::string, property_definition&>;
 
-  event_definition(const std::string& name, uint8_t id);
+  event_definition(const std::string& name, uint8_t id, const std::string &description = "");
   event_definition(const distrac_event_header& header, uint8_t id);
   ~event_definition();
 
@@ -29,13 +31,18 @@ class event_definition {
   void add_property_definition(const property_definition& def);
 
   const std::string& name() const { return _name; }
+  const std::string& description() const { return _description; }
   std::size_t size() const { return _size; }
   uint8_t id() const { return _id; }
 
+  ssize_t get_property_id(const std::string& name) const;
+
   private:
-  property_definition_vector _defs;
   const std::string _name;
+  property_definition_vector _defs;
+  property_definition_map _defs_map;
   std::size_t _size = 0;
   const uint8_t _id;
+  const std::string _description;
 };
 }

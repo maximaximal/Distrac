@@ -14,6 +14,8 @@
 #include "distrac/distrac.h"
 #include "distrac/headers.h"
 
+#include "distrac/analysis/definition.hpp"
+
 namespace distrac {
 
 class event_definition;
@@ -21,16 +23,14 @@ class event_iterator;
 
 class tracefile {
   public:
-  using event_definition_vector = std::vector<event_definition>;
+  using event_definition_vector = definition::event_definition_vector;
 
   tracefile(const std::string& path);
   ~tracefile();
 
   void print_summary();
 
-  const event_definition_vector& event_definitions() const {
-    return _event_definitions;
-  }
+  const event_definition_vector& event_definitions() const;
 
   protected:
   void scan();
@@ -96,7 +96,7 @@ class tracefile {
   std::vector<node> _nodes;
   std::map<int64_t, node&> _id_to_node;
 
-  event_definition_vector _event_definitions;
+  definition _definition;
 
   boost::iostreams::mapped_file _sink;
 

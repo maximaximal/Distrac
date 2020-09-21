@@ -1,3 +1,5 @@
+#include <assert.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -32,6 +34,8 @@ distrac_type_to_str(enum distrac_type type) {
       return "float";
     case DISTRAC_TYPE_BOOL:
       return "bool";
+    case DISTRAC_TYPE__COUNT:
+      assert(false);
   }
 }
 
@@ -64,5 +68,32 @@ distrac_type_sizeof(enum distrac_type type) {
       return sizeof(float);
     case DISTRAC_TYPE_BOOL:
       return sizeof(uint8_t);
+    case DISTRAC_TYPE__COUNT:
+      assert(false);
+  }
+}
+
+size_t
+distrac_type_required_padding(enum distrac_type type) {
+  switch(type) {
+    case DISTRAC_TYPE_UINT8:
+    case DISTRAC_TYPE_INT8:
+    case DISTRAC_TYPE_BOOL:
+    case DISTRAC_TYPE_IPV4:
+    case DISTRAC_TYPE_IPV6:
+      return 0;
+    case DISTRAC_TYPE_UINT16:
+    case DISTRAC_TYPE_INT16:
+      return 1;
+    case DISTRAC_TYPE_UINT32:
+    case DISTRAC_TYPE_INT32:
+    case DISTRAC_TYPE_FLOAT:
+      return 2;
+    case DISTRAC_TYPE_UINT64:
+    case DISTRAC_TYPE_INT64:
+    case DISTRAC_TYPE_DOUBLE:
+      return 3;
+    case DISTRAC_TYPE__COUNT:
+      assert(false);
   }
 }
