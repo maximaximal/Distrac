@@ -11,6 +11,8 @@
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/qi.hpp>
 
+#include <boost/algorithm/string/trim.hpp>
+
 #include <distrac/codegen/parser.hpp>
 
 #include <distrac/analysis/definition.hpp>
@@ -113,7 +115,8 @@ parser::parser() {}
 parser::~parser() {}
 
 parser::result
-parser::generate_definition(const parser_def::definition& def) {
+parser::generate_definition(parser_def::definition& def) {
+  boost::algorithm::trim_right(def.description);
   if(def.description.size() > DISTRAC_DESCRIPTION_LENGTH) {
     return parser_error{ "Event \"" + def.description +
                          "\" has a too long name!" };
@@ -123,7 +126,7 @@ parser::generate_definition(const parser_def::definition& def) {
   out_def.reserve(def.events.size());
 
   uint8_t ev_id = 0;
-  for(const auto& ev : def.events) {
+  for(auto& ev : def.events) {
     if(out_def.get_event_id(ev.name) != -1) {
       return parser_error{ "Event \"" + ev.name +
                            "\" was already defined previously!" };
@@ -131,6 +134,7 @@ parser::generate_definition(const parser_def::definition& def) {
     if(ev.name.size() > DISTRAC_NAME_LENGTH) {
       return parser_error{ "Event \"" + ev.name + "\" has a too long name!" };
     }
+    boost::algorithm::trim_right(ev.description);
     if(ev.description.size() > DISTRAC_DESCRIPTION_LENGTH) {
       return parser_error{ "Event \"" + ev.name +
                            "\" has a too long description!" };

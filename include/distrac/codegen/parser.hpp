@@ -24,6 +24,6 @@ class parser {
   result parse_definition(const std::string& definition);
 
   private:
-  result generate_definition(const parser_def::definition& def);
+  result generate_definition(parser_def::definition& def);
 };
 }
