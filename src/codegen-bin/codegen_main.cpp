@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <fstream>
+#include <ios>
 #include <iostream>
 #include <memory>
 #include <stdexcept>
@@ -21,13 +22,16 @@ using std::endl;
 
 int
 main(int argc, char* argv[]) {
+  bool print_summary;
+
   po::options_description desc("Codegen options");
   po::positional_options_description posDesc;
   // clang-format off
   desc.add_options()
-    ("help", "produce help message")
-    ("output", po::value<std::string>(), "output file for code generation")
-    ("input", po::value<std::string>(), "input file for code generation")
+    ("help,h", "produce help message")
+    ("print-summary,s", po::bool_switch(&print_summary), "print summary of parsed definition file")
+    ("output,o", po::value<std::string>(), "output file for code generation")
+    ("input,i", po::value<std::string>(), "input file for code generation")
   ;
   posDesc.add("input", -1);
   // clang-format on
@@ -50,27 +54,35 @@ main(int argc, char* argv[]) {
   }
 
   std::string input = vm["input"].as<std::string>();
-  if(!fs::exists(input)) {
+  if(input != "-" && !fs::exists(input)) {
     cerr << "!! Input file \"" << input << "\" does not exist!" << endl;
     return EXIT_FAILURE;
   }
-  if(fs::is_directory(input)) {
+  if(input != "-" && fs::is_directory(input)) {
     cerr << "!! File \"" << input << "\" no file, but a directory!" << endl;
     return EXIT_FAILURE;
   }
 
-  std::ifstream in(input, std::ios_base::in);
+  std::string input_text;
 
-  if(!in) {
-    cerr << "!! Could not open input file: " << input << std::endl;
-    return EXIT_FAILURE;
+  if(input == "-") {
+    std::cin.unsetf(std::ios::skipws);
+    std::copy(std::istream_iterator<char>(std::cin),
+              std::istream_iterator<char>(),
+              std::back_inserter(input_text));
+  } else {
+    std::ifstream in(input, std::ios_base::in);
+
+    if(!in) {
+      cerr << "!! Could not open input file: " << input << std::endl;
+      return EXIT_FAILURE;
+    }
+
+    in.unsetf(std::ios::skipws);
+    std::copy(std::istream_iterator<char>(in),
+              std::istream_iterator<char>(),
+              std::back_inserter(input_text));
   }
-
-  std::string input_text;     // We will read the contents here.
-  in.unsetf(std::ios::skipws);// No white space skipping!
-  std::copy(std::istream_iterator<char>(in),
-            std::istream_iterator<char>(),
-            std::back_inserter(input_text));
 
   distrac::parser p;
 
@@ -82,7 +94,26 @@ main(int argc, char* argv[]) {
   }
   const distrac::definition& def = std::get<distrac::definition>(result);
 
-  cerr << "Successfully parsed! Description: " << def.description() << endl;
-  def.print_summary();
+  if(print_summary) {
+    cout << "Successfully parsed! Name: " << def.name()
+         << ", Description: " << def.description() << endl;
+    def.print_summary();
+  }
+
+  if(vm.count("output")) {
+    std::string output = vm["output"].as<std::string>();
+    if(output == "-") {
+      def.generate_c_header(std::cout);
+    } else {
+      std::ofstream out_file(output, std::ios_base::out);
+      if(!out_file) {
+        cerr << "Could not open output file \"" << output << "\" for writing!"
+             << endl;
+        return EXIT_FAILURE;
+      }
+      def.generate_c_header(out_file);
+    }
+  }
+
   return EXIT_SUCCESS;
 }

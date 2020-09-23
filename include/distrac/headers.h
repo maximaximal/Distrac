@@ -48,6 +48,7 @@ typedef struct distrac_file_header {
   char problem_name[DISTRAC_LONGNAME_LENGTH];
   char additional_info[DISTRAC_DESCRIPTION_LENGTH];
   char metadata[DISTRAC_DESCRIPTION_LENGTH];
+  char distrac_name[DISTRAC_NAME_LENGTH];
   char distrac_description[DISTRAC_DESCRIPTION_LENGTH];
   uint64_t seconds_since_epoch_on_start;
   uint8_t event_count;

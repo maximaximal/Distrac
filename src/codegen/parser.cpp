@@ -10,6 +10,7 @@
 #include <boost/spirit/include/phoenix_object.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/qi_list.hpp>
 
 #include <boost/algorithm/string/trim.hpp>
 
@@ -18,7 +19,11 @@
 #include <distrac/analysis/definition.hpp>
 #include <distrac/analysis/event_definition.hpp>
 #include <distrac/analysis/property_definition.hpp>
+
 #include <limits>
+#include <map>
+
+using attributes_map = std::map<std::string, std::string>;
 
 namespace distrac {
 namespace qi = boost::spirit::qi;
@@ -28,33 +33,37 @@ namespace parser_def {
 struct property {
   std::string name;
   distrac_type type;
+  attributes_map attributes;
 };
 struct event {
   std::string name;
   std::string description;
   std::vector<property> properties;
+  attributes_map attributes;
 };
 struct definition {
-  std::string description;
+  attributes_map attributes;
   std::vector<event> events;
 };
 }
 }
 
+// clang-format off
 BOOST_FUSION_ADAPT_STRUCT(distrac::parser_def::property,
                           (std::string, name),
-                          (distrac_type, type))
+                          (distrac_type, type),
+                          (attributes_map, attributes))
 
 BOOST_FUSION_ADAPT_STRUCT(distrac::parser_def::event,
                           (std::string, name),
                           (std::string, description),
-                          (std::vector<distrac::parser_def::property>,
-                           properties))
+                          (std::vector<distrac::parser_def::property>, properties),
+                          (attributes_map, attributes))
 
 BOOST_FUSION_ADAPT_STRUCT(distrac::parser_def::definition,
-                          (std::string,
-                           description)(std::vector<distrac::parser_def::event>,
-                                        events))
+                          (attributes_map, attributes),
+                          (std::vector<distrac::parser_def::event>, events))
+// clang-format on
 
 namespace distrac {
 template<typename Iterator, typename Skipper>
@@ -76,6 +85,7 @@ struct event_definition_parser
     using qi::no_case;
     using namespace boost::spirit::qi;
 
+    quoted_string %= lexeme['"' >> +(char_ - '"') >> '"'];
     identifier %= lexeme[alpha >> +(alnum | char_('_'))];
     text %= lexeme[*(char_ - ';' - '{')];
 
@@ -85,13 +95,20 @@ struct event_definition_parser
       types.add(distrac_type_to_str(t), t);
     }
 
-    property %= identifier >> ':' >> no_case[types];
+    attribute %= identifier > '=' > quoted_string;
 
-    event %= identifier >> ((':' > text > '{') | '{') >> +property >> '}';
+    property %=
+      identifier >> ':' >> no_case[types] >> -('[' > attribute % ',' > ']');
 
-    def %= text > ';' > +event;
+    event %= identifier >> ((':' > text > '{') | '{') >> +property >> '}' >>
+             -('[' > +attribute > ']');
 
+    def %= (attribute % ';') >> +event;
+
+    quoted_string.name("quoted string");
+    text.name("unquoted string");
     identifier.name("identifier");
+    attribute.name("attribute");
     property.name("property");
     event.name("event");
     def.name("definition");
@@ -106,9 +123,11 @@ struct event_definition_parser
 
   qi::rule<Iterator, std::string(), Skipper> identifier;
   qi::rule<Iterator, std::string(), Skipper> text;
+  qi::rule<Iterator, std::pair<std::string, std::string>, Skipper> attribute;
   qi::rule<Iterator, parser_def::property(), Skipper> property;
   qi::rule<Iterator, parser_def::event(), Skipper> event;
   qi::rule<Iterator, parser_def::definition(), Skipper> def;
+  qi::rule<Iterator, std::string(), Skipper> quoted_string;
 };
 
 parser::parser() {}
@@ -116,12 +135,44 @@ parser::~parser() {}
 
 parser::result
 parser::generate_definition(parser_def::definition& def) {
-  boost::algorithm::trim_right(def.description);
-  if(def.description.size() > DISTRAC_DESCRIPTION_LENGTH) {
-    return parser_error{ "Event \"" + def.description +
-                         "\" has a too long name!" };
+  using std::cerr;
+  using std::endl;
+
+  std::string desc = "(no description)";
+  if(!def.attributes.count("description")) {
+    cerr << "Warn: No `description` defined for definition. Defaulting to no "
+            "(no description)."
+         << endl;
+  } else {
+    desc = def.attributes["description"];
+    boost::algorithm::trim_right(desc);
+    if(desc.size() > DISTRAC_DESCRIPTION_LENGTH) {
+      return parser_error{ "Definition \"" + desc +
+                           "\" has a too long description size!" };
+    }
   }
-  definition out_def(def.description);
+
+  std::string name = "unnamed";
+  if(!def.attributes.count("name")) {
+    cerr << "Warn: No `name` defined for definition. Defaulting to no "
+            "unnamed"
+         << endl;
+  } else {
+    name = def.attributes["name"];
+    if(name.size() > DISTRAC_NAME_LENGTH) {
+      return parser_error{ "Definition \"" + name + "\" has a too long name!" };
+    }
+  }
+
+  definition out_def(name, desc);
+
+  if(!def.attributes.count("prefix")) {
+    cerr << "Warn: No `prefix` defined for definition. Defaulting to no prefix."
+         << endl;
+  }
+  else {
+    out_def.set_prefix(def.attributes["prefix"]);
+  }
 
   out_def.reserve(def.events.size());
 

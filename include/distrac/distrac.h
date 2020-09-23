@@ -23,7 +23,6 @@ typedef struct distrac_event {
 } distrac_event;
 
 typedef struct distrac_definition {
-  const char* source;
   distrac_file_header file_header;
   distrac_node_header node_header;
 

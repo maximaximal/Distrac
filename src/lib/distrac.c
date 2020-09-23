@@ -160,11 +160,11 @@ init_definition(distrac_definition* def) {
   def->events = NULL;
   def->event_headers = NULL;
   def->property_headers = NULL;
-  def->source = "";
   def->file_header.event_count = 0;
   strcpy(def->file_header.metadata, "(No Metadata)");
   strcpy(def->file_header.problem_name, "(No Problem Name)");
   strcpy(def->file_header.additional_info, "(No Additional Info)");
+  strcpy(def->file_header.distrac_name, "unnamed");
   strcpy(def->file_header.distrac_description, "(No Distrac Description)");
   gethostname(def->node_header.node_hostname, 255);
 }

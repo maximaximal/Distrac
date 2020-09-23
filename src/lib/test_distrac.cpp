@@ -46,7 +46,6 @@ TEST_CASE("Distrac Push") {
 
   distrac_wrapper handle(
     [](distrac_definition* def) {
-      def->source = "";
       def->file_header.event_count = 2;
       def->event_headers = event_headers;
       def->property_headers = property_headers;
@@ -80,7 +79,6 @@ TEST_CASE("Distrac Push") {
 
   distrac_wrapper handle2 = distrac_wrapper(
     [](distrac_definition* def) {
-      def->source = "";
       def->file_header.event_count = 2;
       def->event_headers = event_headers;
       def->property_headers = property_headers;

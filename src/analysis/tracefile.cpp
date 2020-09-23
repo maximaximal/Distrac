@@ -21,7 +21,7 @@ using std::endl;
 namespace distrac {
 tracefile::tracefile(const std::string& path)
   : _path(path)
-  , _definition("Parsed from tracefile " + path) {
+  , _definition("unnamed", "Parsed from tracefile " + path) {
   _sink.open(path);
   if(!_sink.is_open()) {
     std::cerr << "!! Could not open file as memory mapped file!" << std::endl;
@@ -48,7 +48,8 @@ tracefile::print_summary() {
   cout << "  Problem Name: " << _header->problem_name << endl;
   cout << "  Additional Info: " << _header->additional_info << endl;
   cout << "  Metadata: " << _header->metadata << endl;
-  cout << "  DisTrac Description: " << _header->distrac_description << endl;
+  cout << "  DisTrac Definition Name: " << _header->distrac_name << endl;
+  cout << "  DisTrac Definition Description: " << _header->distrac_description << endl;
   {
     auto time = trace_time();
     cout << "  Start Time: " << std::put_time(std::localtime(&time), "%F %T%z")
@@ -97,6 +98,9 @@ tracefile::scan() {
 
     exit(EXIT_FAILURE);
   }
+
+  _definition.set_name(_header->distrac_name);
+  _definition.set_description(_header->distrac_description);
 
   _definition.reserve(_header->event_count);
 
