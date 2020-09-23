@@ -88,7 +88,7 @@ definition::generate_c_header(std::ostream& o) const {
   o << endl;
   o << "distrac_property_header " << prefix() << "property_headers[" << _definitions.size() << "] = {" << endl;
   for(const auto &ev : _definitions) {
-    o << "  " << prefix() << "ev" << ev.id() << "_property_headers," << endl;
+    o << "  " << prefix() << "ev" << std::to_string(ev.id()) << "_property_headers," << endl;
   }
   o << "};" << endl;
   o << endl;
