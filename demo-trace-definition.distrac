@@ -1,0 +1,32 @@
+prefix="demo_";
+name="Demonstratory Trace Definition";
+description="This is a demonstratory trace definition."
+
+// Comments are also working!
+
+generic_event1 : A standard event. {
+    test : int32
+    test1 : int8
+    test1_ : int8
+    test2 : int16
+}
+
+generic_event2 {
+    test1 : int32
+    test2 : int8
+    test3 : int8
+    padd : int16
+}
+
+causal_event_source : Data is being sent. {
+    tgt_address : ipv4
+    sender_local_stuff : uint16
+    message_identifier : uint16
+}
+
+causal_event_target : Sent data is received. {
+    src_address : ipv4 [match = "tgt_address"]
+    receiver_local_stuff : uint16
+    message_identifier : uint16 [match = "message_identifier"]
+}
+    [after = "causal_event_source"]
