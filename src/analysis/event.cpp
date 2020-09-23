@@ -5,6 +5,7 @@
 #include <distrac/analysis/property_definition.hpp>
 
 #include <cassert>
+#include <iterator>
 
 namespace distrac {
 event::event(const event_definition& def,
@@ -15,7 +16,18 @@ event::event(const event_definition& def,
   , _number(number) {
   init_properties();
 }
-event::event(const event& ev) = default;
+event::event(const event& ev)
+  : _def(ev._def)
+  , _node(ev._node)
+  , _number(ev._number) {
+  std::copy(ev._properties.begin(),
+            ev._properties.end(),
+            std::back_inserter(_properties));
+
+  for(auto& prop : _properties) {
+    prop.set_event(*this);
+  }
+}
 
 event::~event() {}
 
@@ -58,6 +70,23 @@ event::node_tracefile_location_index() const {
 const uint8_t*
 event::memory(uint64_t number) const {
   return _node.get_event_memory(_def.id(), number);
+}
+
+std::ostream&
+event::csv_header_out(std::ostream& o) const {
+  o << "Timestamp,Node Number";
+  for(const auto& prop : _properties) {
+    o << "," << prop.name();
+  }
+  return o;
+}
+std::ostream&
+event::csv_out(std::ostream& o) const {
+  o << timestamp_with_offset() << "," << node_tracefile_location_index();
+  for(const auto& prop : _properties) {
+    o << "," << prop;
+  }
+  return o;
 }
 
 const property&

@@ -49,7 +49,8 @@ tracefile::print_summary() {
   cout << "  Additional Info: " << _header->additional_info << endl;
   cout << "  Metadata: " << _header->metadata << endl;
   cout << "  DisTrac Definition Name: " << _header->distrac_name << endl;
-  cout << "  DisTrac Definition Description: " << _header->distrac_description << endl;
+  cout << "  DisTrac Definition Description: " << _header->distrac_description
+       << endl;
   {
     auto time = trace_time();
     cout << "  Start Time: " << std::put_time(std::localtime(&time), "%F %T%z")
@@ -80,6 +81,10 @@ tracefile::print_summary() {
 const tracefile::event_definition_vector&
 tracefile::event_definitions() const {
   return _definition.definitions();
+}
+ssize_t
+tracefile::get_event_id(const std::string& name) const {
+  return _definition.get_event_id(name);
 }
 
 void
@@ -158,7 +163,7 @@ tracefile::begin() const {
 
   std::forward_list<event> filtered_events;
 
-  for(auto& node : _nodes) {
+  for(const auto& node : _nodes) {
     auto events = node.begin().events();
     std::copy(
       events.begin(), events.end(), std::front_inserter(filtered_events));
@@ -191,7 +196,7 @@ tracefile::filtered_tracefile::begin() const {
 
   std::forward_list<event> filtered_events;
 
-  for(auto& node : trace._nodes) {
+  for(const auto& node : trace._nodes) {
     auto events = node.begin().events();
     std::copy_if(
       events.begin(), events.end(), std::front_inserter(filtered_events), func);

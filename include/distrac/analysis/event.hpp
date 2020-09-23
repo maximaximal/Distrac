@@ -65,6 +65,9 @@ class event {
              rhs.node_tracefile_location_index();
   }
 
+  std::ostream& csv_header_out(std::ostream &o) const;
+  std::ostream& csv_out(std::ostream &o) const;
+
   private:
   const event_definition& _def;
   const ::distrac::node& _node;

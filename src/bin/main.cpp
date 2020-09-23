@@ -1,3 +1,4 @@
+#include <boost/program_options/value_semantic.hpp>
 #include <cstdlib>
 #include <iostream>
 #include <memory>
@@ -11,6 +12,7 @@
 #include <gtkmm-3.0/gtkmm/application.h>
 #endif
 
+#include <distrac/analysis/event_iterator.hpp>
 #include <distrac/analysis/tracefile.hpp>
 
 namespace po = boost::program_options;
@@ -30,6 +32,8 @@ main(int argc, char* argv[]) {
   desc.add_options()
     ("help", "produce help message")
     ("trace", po::value<std::string>(), "input file for tracing")
+    ("print-summary,s", po::bool_switch(&print_summary), "print summary of tracefile")
+    ("print-event,e", po::value<std::string>(), "print all occurences of a given event name")
   ;
   posDesc.add("trace", -1);
   // clang-format on
@@ -43,6 +47,7 @@ main(int argc, char* argv[]) {
   po::notify(vm);
 
   if(vm.count("help")) {
+    cout << desc << endl;
     return EXIT_SUCCESS;
   }
 
@@ -67,6 +72,26 @@ main(int argc, char* argv[]) {
     tracefile.print_summary();
   }
 
+  if(vm.count("print-event")) {
+    std::string event_name = vm["print-event"].as<std::string>();
+    ssize_t event_id = tracefile.get_event_id(event_name);
+    if(event_id == -1) {
+      cerr << "!! Event \"" << event_name << "\" does not exist!" << endl;
+      return EXIT_FAILURE;
+    }
+
+    assert(event_id >= 0 && event_id < 255);
+    bool first = true;
+    for(const auto& ev :
+        tracefile.filtered({ static_cast<uint8_t>(event_id) })) {
+      if(first) {
+        ev.csv_header_out(std::cout) << endl;
+        first = false;
+      }
+      ev.csv_out(std::cout) << endl;
+    }
+  }
+
 #ifdef ENABLE_INTERACTIVE_VIEWER
   auto app = Gtk::Application::create("at.maxheisinger.distrac");
 
@@ -75,4 +100,6 @@ main(int argc, char* argv[]) {
   return app->run(mainWindow);
 #else
 #endif
+
+  return EXIT_SUCCESS;
 }

@@ -31,6 +31,34 @@ class tracefile {
   void print_summary();
 
   const event_definition_vector& event_definitions() const;
+  ssize_t get_event_id(const std::string &name) const;
+
+  std::chrono::time_point<std::chrono::system_clock> trace_time_point() {
+    return std::chrono::system_clock::time_point{ std::chrono::seconds{
+      _header->seconds_since_epoch_on_start } };
+  }
+  std::time_t trace_time() {
+    return std::chrono::system_clock::to_time_t(trace_time_point());
+  }
+
+  event_iterator begin() const;
+  event_iterator end() const;
+
+  using event_filter_func = std::function<bool(const event&)>;
+  using event_filter_set = std::set<uint8_t>;
+
+  struct filtered_tracefile {
+    event_filter_func func;
+    const tracefile& trace;
+
+    event_iterator begin() const;
+    event_iterator end() const;
+  };
+
+  size_t event_count(uint8_t ev) const;
+
+  filtered_tracefile filtered(event_filter_func func) const;
+  filtered_tracefile filtered(event_filter_set event_ids) const;
 
   protected:
   void scan();
@@ -61,33 +89,6 @@ class tracefile {
     return _byte_size - pos > size;
   }
   void assert_size_left(size_t pos, size_t size, const char* structname);
-
-  std::chrono::time_point<std::chrono::system_clock> trace_time_point() {
-    return std::chrono::system_clock::time_point{ std::chrono::seconds{
-      _header->seconds_since_epoch_on_start } };
-  }
-  std::time_t trace_time() {
-    return std::chrono::system_clock::to_time_t(trace_time_point());
-  }
-
-  event_iterator begin() const;
-  event_iterator end() const;
-
-  using event_filter_func = std::function<bool(const event&)>;
-  using event_filter_set = std::set<uint8_t>;
-
-  struct filtered_tracefile {
-    event_filter_func func;
-    const tracefile& trace;
-
-    event_iterator begin() const;
-    event_iterator end() const;
-  };
-
-  size_t event_count(uint8_t ev) const;
-
-  filtered_tracefile filtered(event_filter_func func) const;
-  filtered_tracefile filtered(event_filter_set event_ids) const;
 
   private:
   std::string _path;

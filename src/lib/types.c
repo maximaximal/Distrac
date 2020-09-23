@@ -80,10 +80,10 @@ distrac_type_required_padding(enum distrac_type type) {
     case DISTRAC_TYPE_INT8:
     case DISTRAC_TYPE_BOOL:
     case DISTRAC_TYPE_IPV4:
-    case DISTRAC_TYPE_IPV6:
       return 0;
     case DISTRAC_TYPE_UINT16:
     case DISTRAC_TYPE_INT16:
+    case DISTRAC_TYPE_IPV6:
       return 1;
     case DISTRAC_TYPE_UINT32:
     case DISTRAC_TYPE_INT32:

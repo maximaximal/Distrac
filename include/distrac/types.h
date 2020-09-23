@@ -31,7 +31,7 @@ typedef struct distrac_ipv4 {
 } distrac_ipv4;
 
 typedef struct distrac_ipv6 {
-  uint8_t segments[16];
+  uint16_t segments[8];
 } distrac_ipv6;
 
 typedef int64_t distrac_id;
@@ -47,6 +47,27 @@ size_t
 distrac_type_required_padding(enum distrac_type type);
 
 #ifdef __cplusplus
+}
+#include <iomanip>
+#include <ostream>
+
+inline std::ostream&
+operator<<(std::ostream& o, const distrac_ipv4& ipv4) {
+  return o << ipv4.segments[0] << "." << ipv4.segments[0] << "."
+           << ipv4.segments[0] << "." << ipv4.segments[0];
+}
+
+inline std::ostream&
+operator<<(std::ostream& o, const distrac_ipv6& ipv6) {
+  std::ios ostream_state(nullptr);
+  ostream_state.copyfmt(o);
+
+  for(size_t i = 0; i < 16; ++i) {
+    o << std::setfill('0') << std::setw(4) << std::hex << ipv6.segments[i];
+  }
+
+  o.copyfmt(ostream_state);
+  return o;
 }
 
 template<typename Functor>
@@ -87,7 +108,6 @@ distrac_memory_to_type(const uint8_t* mem,
   }
 }
 
-#include <ostream>
 inline std::ostream&
 operator<<(std::ostream& o, const distrac_type t) {
   return o << distrac_type_to_str(t);
