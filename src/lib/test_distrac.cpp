@@ -13,7 +13,7 @@ static distrac_event_header event_headers[] = {
 static distrac_property_header ev0_property_headers[]{
   distrac_property_header{ "prop1", DISTRAC_TYPE_INT16, false, 0, 0 },
   distrac_property_header{ "prop2", DISTRAC_TYPE_INT16, false, 0, 0 },
-  distrac_property_header{ "prop3", DISTRAC_TYPE_INT32, false, 0, 0 }
+  distrac_property_header{ "prop3", DISTRAC_TYPE_IPV4, false, 0, 0 }
 };
 static distrac_property_header ev1_property_headers[]{
   distrac_property_header{ "other-prop1", DISTRAC_TYPE_INT16, false, 0, 0 },
