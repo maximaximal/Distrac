@@ -6,19 +6,19 @@
 #include <distrac/types.h>
 
 static distrac_event_header event_headers[] = {
-  distrac_event_header{ "event1", "", 3 },
-  distrac_event_header{ "event2", "", 3 }
+  distrac_event_header{ "event1", "", false, 0, 3 },
+  distrac_event_header{ "event2", "", false, 0, 3 }
 };
 
 static distrac_property_header ev0_property_headers[]{
-  distrac_property_header{ "prop1", DISTRAC_TYPE_INT16, false, 0, 0 },
-  distrac_property_header{ "prop2", DISTRAC_TYPE_INT16, false, 0, 0 },
-  distrac_property_header{ "prop3", DISTRAC_TYPE_IPV4, false, 0, 0 }
+  distrac_property_header{ "prop1", DISTRAC_TYPE_INT16, false, 0 },
+  distrac_property_header{ "prop2", DISTRAC_TYPE_INT16, false, 0 },
+  distrac_property_header{ "prop3", DISTRAC_TYPE_IPV4, false, 0 }
 };
 static distrac_property_header ev1_property_headers[]{
-  distrac_property_header{ "other-prop1", DISTRAC_TYPE_INT16, false, 0, 0 },
-  distrac_property_header{ "other-prop2", DISTRAC_TYPE_INT16, false, 0, 0 },
-  distrac_property_header{ "other-prop3", DISTRAC_TYPE_INT32, false, 0, 0 }
+  distrac_property_header{ "other-prop1", DISTRAC_TYPE_INT16, false, 0 },
+  distrac_property_header{ "other-prop2", DISTRAC_TYPE_INT16, false, 0 },
+  distrac_property_header{ "other-prop3", DISTRAC_TYPE_INT32, false, 0 }
 };
 
 static distrac_property_header* property_headers[]{ ev0_property_headers,

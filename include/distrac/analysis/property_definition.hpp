@@ -29,9 +29,22 @@ class property_definition {
   size_t offset(const event_definition& ev) const;
   bool is_correctly_aligned(const event_definition& ev) const;
 
+  bool has_causal_dependency() const { return _has_causal_dependency; }
+  void set_has_causal_dependency(bool v) { _has_causal_dependency = v; }
+
+  uint8_t causal_dependency_property_id() const {
+    return _causal_dependency_property_id;
+  }
+  void set_causal_dependency_property_id(uint8_t id) {
+    _causal_dependency_property_id = id;
+  }
+
   private:
   std::string _name;
   distrac_type _type;
   uint8_t _id;
+
+  bool _has_causal_dependency = false;
+  uint8_t _causal_dependency_property_id = 0;
 };
 }

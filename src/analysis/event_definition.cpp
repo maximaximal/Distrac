@@ -20,6 +20,17 @@ event_definition::event_definition(const distrac_event_header& header,
   , _description(header.description) {
   _defs.reserve(header.property_count);
 }
+DISTRAC_ANALYSIS_EXPORT
+event_definition::event_definition(const event_definition& o)
+  : _name(o._name)
+  , _defs(o._defs)
+  , _size(o._size)
+  , _id(o._id)
+  , _description(o._description)
+  , _has_causal_dependency(o._has_causal_dependency)
+  , _causal_dependency_event_id(o._causal_dependency_event_id) {
+  recompute_map();
+}
 DISTRAC_ANALYSIS_EXPORT event_definition::~event_definition() {}
 
 DISTRAC_ANALYSIS_EXPORT std::size_t
@@ -41,5 +52,12 @@ event_definition::get_property_id(const std::string& name) const {
   if(it == _defs_map.end())
     return -1;
   return it->second.id();
+}
+
+void
+event_definition::recompute_map() {
+  for(size_t i = 0; i < _defs.size(); ++i) {
+    _defs_map.insert({ _defs[i].name(), _defs[i] });
+  }
 }
 }

@@ -169,8 +169,7 @@ parser::generate_definition(parser_def::definition& def) {
   if(!def.attributes.count("prefix")) {
     cerr << "Warn: No `prefix` defined for definition. Defaulting to no prefix."
          << endl;
-  }
-  else {
+  } else {
     out_def.set_prefix(def.attributes["prefix"]);
   }
 
@@ -192,8 +191,23 @@ parser::generate_definition(parser_def::definition& def) {
     }
 
     event_definition ev_def(ev.name, ev_id++, ev.description);
+    if(ev.attributes.count("after")) {
+      const std::string& after = ev.attributes["after"];
+      ssize_t after_event_id = out_def.get_event_id(after);
+
+      if(after_event_id == -1) {
+        return parser_error{ "Event \"" + ev.name +
+                             "\" has a causal dependency on event \"" + after +
+                             "\", which could not be found!" };
+      }
+
+      ev_def.set_has_causal_dependency(true);
+      ev_def.set_causal_dependency_event_id(
+        static_cast<uint8_t>(after_event_id));
+    }
+
     uint8_t prop_id = 0;
-    for(const auto& prop : ev.properties) {
+    for(auto& prop : ev.properties) {
       if(prop.name.size() > DISTRAC_NAME_LENGTH) {
         return parser_error{ "Property \"" + prop.name + "\" in event \"" +
                              ev.name + "\" has a too long name!" };
@@ -215,6 +229,31 @@ parser::generate_definition(parser_def::definition& def) {
         return parser_error{ "Property \"" + prop.name + "\" in event \"" +
                              ev.name +
                              "\" is not properly aligned for its type!" };
+      }
+      if(prop.attributes.count("match")) {
+        const std::string& match = prop.attributes["match"];
+        if(!ev_def.has_causal_dependency()) {
+          return parser_error{ "Property \"" + prop.name + "\" in event \"" +
+                               ev.name + "\" has a match attribute \"" + match +
+                               "\", but event has no "
+                               "causal dependency specified!" };
+        }
+        const event_definition& after_event =
+          out_def.definitions()[ev_def.causal_dependency_event_id()];
+        ssize_t match_property_id = after_event.get_property_id(match);
+
+        if(match_property_id == -1) {
+          return parser_error{
+            "Property \"" + prop.name + "\" in event \"" + ev.name +
+            "\" has a match attribute \"" + match +
+            "\", but no matching property can be found in event \"" +
+            after_event.name() + "\"!"
+          };
+        }
+
+        prop_def.set_has_causal_dependency(true);
+        prop_def.set_causal_dependency_property_id(
+          static_cast<uint8_t>(match_property_id));
       }
       ev_def.add_property_definition(prop_def);
     }

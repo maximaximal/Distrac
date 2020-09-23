@@ -40,10 +40,26 @@ definition::print_summary() const {
   using std::endl;
   cout << "  Events:" << endl;
   for(auto& ev : _definitions) {
-    cout << "    Event " << ev.name() << " (" << ev.description()
-         << ") :" << endl;
+    cout << "    Event " << ev.name() << " (" << ev.description() << ") :";
+
+    const event_definition* after = nullptr;
+
+    if(ev.has_causal_dependency()) {
+      after = &_definitions[ev.causal_dependency_event_id()];
+      cout << " (must come after \"" << after->name() << "\")";
+    }
+    cout << endl;
+
     for(auto& prop : ev.definitions()) {
-      cout << "      Property " << prop.name() << " : " << prop.type() << endl;
+      cout << "      Property " << prop.name() << " : " << prop.type();
+      if(prop.has_causal_dependency()) {
+        assert(after);
+        cout
+          << " (matches \"" << after->name() << "."
+          << after->definitions()[prop.causal_dependency_property_id()].name()
+          << "\")";
+      }
+      cout << endl;
     }
   }
 }
@@ -71,7 +87,7 @@ definition::generate_c_header(std::ostream& o) const {
   o << endl;
   o << "distrac_event_header " << prefix() << "event_headers[" << _definitions.size() << "] = {" << endl;
   for(const auto &ev : _definitions) {
-    o << "  distrac_event_header{\"" << ev.name() << "\", \"" << ev.description() << "\", " << ev.property_count() << " }," << endl;
+    o << "  distrac_event_header{\"" << ev.name() << "\", \"" << ev.description() << "\", " << ev.has_causal_dependency() << ", " << std::to_string(ev.causal_dependency_event_id()) << ", " << ev.property_count() << " }," << endl;
   }
   o << "};" << endl;
   o << endl;
@@ -81,7 +97,7 @@ definition::generate_c_header(std::ostream& o) const {
       std::string type = distrac_type_to_str(prop.type());
       boost::to_upper(type);
       type = "DISTRAC_TYPE_" + type;
-      o << "  distrac_property_header{ \"" << prop.name() << "\", " << type << ", false, 0, 0 }," << endl;
+      o << "  distrac_property_header{ \"" << prop.name() << "\", " << type << ", " << prop.has_causal_dependency() << ", " << std::to_string(prop.causal_dependency_property_id()) << " }," << endl;
     }
     o << "};" << endl;
   }

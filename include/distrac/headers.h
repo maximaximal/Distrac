@@ -32,13 +32,14 @@ typedef struct distrac_property_header {
   char name[DISTRAC_NAME_LENGTH];
   uint8_t datatype;
   bool enable_after_constraint;
-  uint8_t after_event_id;
   uint8_t after_event_property;
 } distrac_property_header;
 
 typedef struct distrac_event_header {
   char name[DISTRAC_NAME_LENGTH];
   char description[DISTRAC_LONGNAME_LENGTH];
+  bool enable_after_constraint;
+  uint8_t after_event_id;
   uint8_t property_count;
   // After property count follows the specified number of property headers.
 } distrac_event_header;
