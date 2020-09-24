@@ -12,7 +12,7 @@ definition::definition() = default;
 definition::definition(std::string name, std::string description)
   : _name(std::move(name))
   , _description(std::move(description)) {}
-  definition::~definition() = default;
+definition::~definition() = default;
 
 void
 definition::reserve(uint8_t count) {
@@ -78,6 +78,9 @@ definition::generate_c_header(std::ostream& o) const {
   o << endl;
   o << "/* THIS FILE WAS AUTOMATICALLY GFNERATED USING DISTRAC!" << endl;
   o << " * BE AWARE OF POSSIBLE ISSUES WHEN EDITING AND RE-GENERATING! */" << endl;
+  o << endl;
+  o << "#include <distrac/headers.h>" << endl;
+  o << "#include <distrac/types.h>" << endl;
   o << endl;
   o << "#ifdef __cplusplus" << endl;
   o << "extern \"C\" {" << endl;
