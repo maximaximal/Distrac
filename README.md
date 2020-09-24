@@ -1,4 +1,4 @@
-# Distrac: A High-Performance Distributed Event-Based Tracer
+# Distrac: A High-Performance Distributed Event-Based Tracing Tool
 
 Work in progress.
 
