@@ -104,28 +104,30 @@ add_library(distrac STATIC ${DISTRAC_SRCS})
 target_include_directories(distrac PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set_property(TARGET distrac PROPERTY POSITION_INDEPENDENT_CODE ON)
 
-add_library(distrac-codegen SHARED ${DISTRAC_CODEGEN_SRCS})
-target_link_libraries(distrac-codegen PUBLIC distrac)
-set_property(TARGET distrac-codegen PROPERTY CXX_STANDARD 17)
-generate_export_header(distrac-codegen)
-target_include_directories(distrac-codegen PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-
 add_library(distrac-analysis SHARED ${DISTRAC_ANALYSIS_SRCS})
 target_link_libraries(distrac-analysis PUBLIC distrac Boost::iostreams)
 set_property(TARGET distrac-analysis PROPERTY CXX_STANDARD 17)
 generate_export_header(distrac-analysis)
 target_include_directories(distrac-analysis PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-add_executable(distrac-bin ${DISTRAC_BIN_SRCS})
-set_target_properties(distrac-bin
-    PROPERTIES OUTPUT_NAME distrac)
-target_link_libraries(distrac-bin Boost::program_options Boost::filesystem Threads::Threads distrac-analysis)
+if(DISTRAC_PROJECT)
+    add_library(distrac-codegen SHARED ${DISTRAC_CODEGEN_SRCS})
+    target_link_libraries(distrac-codegen PUBLIC distrac)
+    set_property(TARGET distrac-codegen PROPERTY CXX_STANDARD 17)
+    generate_export_header(distrac-codegen)
+    target_include_directories(distrac-codegen PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-add_executable(distrac-codegen-bin ${DISTRAC_CODEGEN_BIN_SRCS})
-set_property(TARGET distrac-codegen-bin PROPERTY CXX_STANDARD 17)
-set_target_properties(distrac-codegen-bin
-    PROPERTIES OUTPUT_NAME distrac-codegen)
-target_link_libraries(distrac-codegen-bin Boost::program_options Boost::filesystem Threads::Threads distrac-codegen distrac-analysis)
+    add_executable(distrac-bin ${DISTRAC_BIN_SRCS})
+    set_target_properties(distrac-bin
+        PROPERTIES OUTPUT_NAME distrac)
+    target_link_libraries(distrac-bin Boost::program_options Boost::filesystem Threads::Threads distrac-analysis)
+
+    add_executable(distrac-codegen-bin ${DISTRAC_CODEGEN_BIN_SRCS})
+    set_property(TARGET distrac-codegen-bin PROPERTY CXX_STANDARD 17)
+    set_target_properties(distrac-codegen-bin
+        PROPERTIES OUTPUT_NAME distrac-codegen)
+    target_link_libraries(distrac-codegen-bin Boost::program_options Boost::filesystem Threads::Threads distrac-codegen distrac-analysis)
+endif()
 
 if(DISTRAC_PROJECT)
     if(DISTRAC_ENABLE_TESTS)

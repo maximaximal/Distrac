@@ -1,1 +1,3 @@
-add_subdirectory(catch)
+if(DISTRAC_PROJECT)
+    add_subdirectory(catch)
+endif()
