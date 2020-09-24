@@ -18,7 +18,6 @@
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 using std::cerr;
-using std::clog;
 using std::cout;
 using std::endl;
 
@@ -26,9 +25,11 @@ int
 main(int argc, char* argv[]) {
   bool print_summary = true;
 
+  po::variables_map vm;
   po::options_description desc("Allowed options");
-  po::positional_options_description posDesc;
-  // clang-format off
+  try {
+    po::positional_options_description posDesc;
+    // clang-format off
   desc.add_options()
     ("help", "produce help message")
     ("trace", po::value<std::string>(), "input file for tracing")
@@ -36,15 +37,18 @@ main(int argc, char* argv[]) {
     ("print-event,e", po::value<std::string>(), "print all occurences of a given event name")
   ;
   posDesc.add("trace", -1);
-  // clang-format on
-  po::variables_map vm;
-  po::store(po::command_line_parser(argc, argv)
-              .options(desc)
-              .positional(posDesc)
-              .allow_unregistered()
-              .run(),
-            vm);
-  po::notify(vm);
+    // clang-format on
+    po::store(po::command_line_parser(argc, argv)
+                .options(desc)
+                .positional(posDesc)
+                .allow_unregistered()
+                .run(),
+              vm);
+    po::notify(vm);
+  } catch(std::exception& e) {
+    std::cerr << "!! Error during parameter parsing: " << e.what() << endl;
+    return EXIT_FAILURE;
+  }
 
   if(vm.count("help")) {
     cout << desc << endl;

@@ -4,6 +4,7 @@
 #include <boost/fusion/adapted.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/fusion/include/io.hpp>
+#include <boost/spirit/home/qi/nonterminal/error_handler.hpp>
 #include <boost/spirit/home/qi/string/symbols.hpp>
 #include <boost/spirit/home/support/common_terminals.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
@@ -31,13 +32,13 @@ namespace ascii = boost::spirit::ascii;
 
 namespace parser_def {
 struct property {
-  std::string name;
-  distrac_type type;
+  std::string name = "";
+  distrac_type type = DISTRAC_TYPE_UINT8;
   attributes_map attributes;
 };
 struct event {
-  std::string name;
-  std::string description;
+  std::string name = "";
+  std::string description = "";
   std::vector<property> properties;
   attributes_map attributes;
 };
@@ -77,13 +78,16 @@ struct event_definition_parser
     using ascii::char_;
     using boost::phoenix::construct;
     using boost::phoenix::val;
+    using qi::_2;
+    using qi::_3;
+    using qi::_4;
     using qi::double_;
     using qi::fail;
     using qi::int_;
     using qi::lexeme;
     using qi::lit;
     using qi::no_case;
-    using namespace boost::spirit::qi;
+    using qi::on_error;
 
     quoted_string %= lexeme['"' >> +(char_ - '"') >> '"'];
     identifier %= lexeme[alpha >> +(alnum | char_('_'))];
@@ -91,7 +95,7 @@ struct event_definition_parser
 
     qi::symbols<char, distrac_type> types;
     for(size_t i = 0; i < DISTRAC_TYPE__COUNT; ++i) {
-      distrac_type t = static_cast<distrac_type>(i);
+      auto t = static_cast<distrac_type>(i);
       types.add(distrac_type_to_str(t), t);
     }
 
@@ -121,6 +125,7 @@ struct event_definition_parser
                 << val("\"") << std::endl);
   }
 
+  private:
   qi::rule<Iterator, std::string(), Skipper> identifier;
   qi::rule<Iterator, std::string(), Skipper> text;
   qi::rule<Iterator, std::pair<std::string, std::string>, Skipper> attribute;
@@ -130,8 +135,8 @@ struct event_definition_parser
   qi::rule<Iterator, std::string(), Skipper> quoted_string;
 };
 
-parser::parser() {}
-parser::~parser() {}
+parser::parser() = default;
+parser::~parser() = default;
 
 parser::result
 parser::generate_definition(parser_def::definition& def) {
@@ -257,7 +262,7 @@ parser::generate_definition(parser_def::definition& def) {
       }
       ev_def.add_property_definition(prop_def);
     }
-    if((ev_def.size() & 0b00000111) != 0) {
+    if((ev_def.size() & 0b00000111U) != 0) {
       return parser_error{ "Event \"" + ev.name +
                            "\" must have a size that is multiple of 8 bytes!" };
     }
@@ -273,7 +278,9 @@ parser::parse_definition(const std::string& definition) {
   using Skipper = qi::rule<Iterator>;
 
   // Skipper for comments from https://stackoverflow.com/a/44531686
-  Skipper block_comment, single_line_comment, skipper;
+  Skipper block_comment;
+  Skipper single_line_comment;
+  Skipper skipper;
   {
     using namespace qi;
     single_line_comment = "//" >> *(char_ - eol) >> (eol | eoi);

@@ -2,17 +2,13 @@
 #include <distrac/analysis/event_definition.hpp>
 #include <distrac/analysis/property_definition.hpp>
 
-#include <distrac-analysis_export.h>
-
 namespace distrac {
-DISTRAC_ANALYSIS_EXPORT
-event_definition::event_definition(const std::string& name,
+event_definition::event_definition(std::string name,
                                    uint8_t id,
-                                   const std::string& description)
-  : _name(name)
+                                   std::string description)
+  : _name(std::move(name))
   , _id(id)
-  , _description(description) {}
-DISTRAC_ANALYSIS_EXPORT
+  , _description(std::move(description)) {}
 event_definition::event_definition(const distrac_event_header& header,
                                    uint8_t id)
   : _name(header.name)
@@ -20,7 +16,6 @@ event_definition::event_definition(const distrac_event_header& header,
   , _description(header.description) {
   _defs.reserve(header.property_count);
 }
-DISTRAC_ANALYSIS_EXPORT
 event_definition::event_definition(const event_definition& o)
   : _name(o._name)
   , _defs(o._defs)
@@ -31,15 +26,15 @@ event_definition::event_definition(const event_definition& o)
   , _causal_dependency_event_id(o._causal_dependency_event_id) {
   recompute_map();
 }
-DISTRAC_ANALYSIS_EXPORT event_definition::~event_definition() {}
+event_definition::~event_definition() = default;
 
-DISTRAC_ANALYSIS_EXPORT std::size_t
+std::size_t
 event_definition::property_size(std::size_t id) const {
   const property_definition& def = definition(id);
   return def.size();
 }
 
-DISTRAC_ANALYSIS_EXPORT void
+void
 event_definition::add_property_definition(const property_definition& def) {
   _defs.push_back(def);
   _size += def.size();
@@ -56,6 +51,7 @@ event_definition::get_property_id(const std::string& name) const {
 
 void
 event_definition::recompute_map() {
+  // NOLINTNEXTLINE modernize-loop-convert
   for(size_t i = 0; i < _defs.size(); ++i) {
     _defs_map.insert({ _defs[i].name(), _defs[i] });
   }

@@ -58,7 +58,7 @@ class tracefile {
   size_t event_count(uint8_t ev) const;
 
   filtered_tracefile filtered(event_filter_func func) const;
-  filtered_tracefile filtered(event_filter_set event_ids) const;
+  filtered_tracefile filtered(const event_filter_set &event_ids) const;
 
   protected:
   void scan();
@@ -101,6 +101,6 @@ class tracefile {
 
   boost::iostreams::mapped_file _sink;
 
-  distrac_file_header* _header;
+  distrac_file_header* _header = nullptr;
 };
 }

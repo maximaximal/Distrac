@@ -10,7 +10,7 @@ property::property(const distrac::event& event,
   : _event(&event)
   , _def(def)
   , _offset(offset) {}
-property::~property() {}
+property::~property() = default;
 
 const std::string&
 property::name() const {

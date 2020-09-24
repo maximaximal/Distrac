@@ -29,7 +29,7 @@ node::node(const distrac_node_header& header,
          sizeof(uint64_t) * trace.event_definitions().size());
   _following_size = compute_following_size();
 }
-node::~node() {}
+node::~node() = default;
 
 size_t
 node::compute_following_size() {
