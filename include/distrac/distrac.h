@@ -51,7 +51,10 @@ distrac_destroy(distrac_handle* handle);
 
 class distrac_wrapper : public distrac_handle {
   public:
-  distrac_wrapper() {}
+  distrac_wrapper() {
+    working_directory = nullptr;
+    output_path = nullptr;
+  }
   ~distrac_wrapper() {
     if(_initialized)
       distrac_destroy(this);
@@ -73,6 +76,8 @@ class distrac_wrapper : public distrac_handle {
 
     _initialized = true;
   }
+
+  void finalize(int64_t offset) { distrac_finalize(this, offset); }
 
   private:
   bool _initialized = false;
