@@ -26,7 +26,7 @@ class property_definition {
   std::size_t size() const { return distrac_type_sizeof(_type); }
   uint8_t id() const { return _id; }
 
-  size_t offset(const event_definition& ev) const;
+  static size_t offset(const event_definition& ev);
   bool is_correctly_aligned(const event_definition& ev) const;
 
   bool has_causal_dependency() const { return _has_causal_dependency; }

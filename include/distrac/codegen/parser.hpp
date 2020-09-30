@@ -6,9 +6,9 @@ namespace distrac {
 class definition;
 
 namespace parser_def {
-class property;
-class event;
-class definition;
+struct property;
+struct event;
+struct definition;
 }
 
 class parser {
@@ -24,6 +24,6 @@ class parser {
   result parse_definition(const std::string& definition);
 
   private:
-  result generate_definition(parser_def::definition& def);
+  static result generate_definition(parser_def::definition& def);
 };
 }

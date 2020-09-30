@@ -29,14 +29,14 @@ event::event(const event& ev)
   }
 }
 
-event::~event() {}
+  event::~event() = default;
 
 void
 event::init_properties() {
   _properties.clear();
   std::size_t offset = 0;
   for(auto& definition : _def.definitions()) {
-    _properties.push_back(distrac::property(*this, definition, offset));
+    _properties.emplace_back(distrac::property(*this, definition, offset));
     offset += definition.size();
   }
 }

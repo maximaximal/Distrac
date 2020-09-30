@@ -11,12 +11,10 @@
 
 #include <distrac/analysis/definition.hpp>
 #include <distrac/codegen/parser.hpp>
-#include <stdlib.h>
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 using std::cerr;
-using std::clog;
 using std::cout;
 using std::endl;
 

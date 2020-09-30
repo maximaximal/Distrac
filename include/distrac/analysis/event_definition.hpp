@@ -16,9 +16,9 @@ class event_definition {
   using property_definition_vector = std::vector<property_definition>;
   using property_definition_map = std::map<std::string, property_definition&>;
 
-  event_definition(const std::string& name,
+  event_definition(std::string name,
                    uint8_t id,
-                   const std::string& description = "");
+                   std::string description = "");
   event_definition(const distrac_event_header& header, uint8_t id);
   event_definition(const event_definition &o);
   ~event_definition();

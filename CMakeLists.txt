@@ -64,6 +64,10 @@ if(DISTRAC_PROJECT)
         endif()
 
         set(DO_CLANG_TIDY "${CLANG_TIDY_EXE}" ${CLANG_TIDY_ARG_FIX} "-checks=*,-clang-analyzer-alpha.*,-llvm-namespace-comment,-google-readability-namespace-comments,-fuchsia*,-modernize-use-trailing-return-type,-hicpp-no-array-decay,-cppcoreguidelines-*,-modernize-use-equals-default,-*braces-around-statements,-hicpp-avoid-goto,-modernize-concat-nested-namespaces,-readability-implicit-bool-conversion")
+
+        if(DEBUG_ENABLE_CLANG_TIDY)
+            set(CMAKE_CXX_CLANG_TIDY ${DO_CLANG_TIDY})
+        endif()
     endif()
 
     find_program(CCACHE_PROGRAM ccache)

@@ -40,7 +40,7 @@ tracefile::tracefile(const std::string& path)
 
   scan();
 }
-tracefile::~tracefile() {}
+tracefile::~tracefile() = default;
 
 void
 tracefile::print_summary() {
@@ -71,7 +71,7 @@ tracefile::print_summary() {
     cout << "      Program: " << node.program() << endl;
     cout << "      Internal Node Number: " << node.offset_ns() << endl;
     cout << "      ID: " << node.id() << endl;
-    for(uint8_t ev = 0; ev < event_definitions().size(); ++ev) {
+    for(size_t ev = 0; ev < event_definitions().size(); ++ev) {
       cout << "      " << node.event_count(ev) << " "
            << event_definitions()[ev].name() << " events" << endl;
     }
@@ -127,8 +127,7 @@ tracefile::scan() {
   // Parse nodes and event data.
   while(is_size_left(pos, sizeof(distrac_node_header))) {
     read_until_aligned(pos);
-    const distrac_node_header& node_header =
-      read_struct<distrac_node_header>(pos);
+    const auto& node_header = read_struct<distrac_node_header>(pos);
 
     node n{ node_header, *this, _nodes.size() };
 
@@ -181,10 +180,10 @@ tracefile::end() const {
 
 tracefile::filtered_tracefile
 tracefile::filtered(event_filter_func func) const {
-  return filtered_tracefile{ func, *this };
+  return filtered_tracefile{ std::move(func), *this };
 }
 tracefile::filtered_tracefile
-tracefile::filtered(std::set<uint8_t> event_ids) const {
+tracefile::filtered(const event_filter_set& event_ids) const {
   return filtered_tracefile{
     [event_ids](const event& ev) { return event_ids.count(ev.id()); }, *this
   };

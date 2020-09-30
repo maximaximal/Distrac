@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 #define DISTRAC_NAME_LENGTH 32
@@ -55,6 +56,21 @@ typedef struct distrac_file_header {
   uint8_t event_count;
   // After event count follows the specified number of event headers.
 } distrac_file_header;
+
+typedef struct distrac_event {
+  size_t size;
+  uint64_t count;
+} distrac_event;
+
+typedef struct distrac_definition {
+  distrac_file_header file_header;
+  distrac_node_header node_header;
+
+  distrac_event_header* event_headers;
+  distrac_property_header** property_headers;
+
+  distrac_event* events;
+} distrac_definition;
 
 #ifdef __cplusplus
 }

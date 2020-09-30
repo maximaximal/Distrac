@@ -15,7 +15,7 @@ class definition {
     std::map<std::string, distrac::event_definition&>;
 
   definition();
-  definition(const std::string& name, const std::string& description);
+  definition(std::string name, std::string description);
   ~definition();
 
   const event_definition_vector& definitions() const { return _definitions; }
@@ -31,7 +31,9 @@ class definition {
   void set_name(const std::string& name) { _name = name; };
   const std::string& name() const { return _name; }
 
-  void set_description(const std::string& description) { _description = description; };
+  void set_description(const std::string& description) {
+    _description = description;
+  };
   const std::string& description() const { return _description; }
 
   void set_prefix(const std::string& prefix) { _prefix = prefix; };

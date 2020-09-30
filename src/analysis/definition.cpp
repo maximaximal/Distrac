@@ -8,11 +8,11 @@
 #include <iostream>
 
 namespace distrac {
-definition::definition() {}
-definition::definition(const std::string& name, const std::string& description)
-  : _name(name)
-  , _description(description) {}
-definition::~definition() {}
+definition::definition() = default;
+definition::definition(std::string name, std::string description)
+  : _name(std::move(name))
+  , _description(std::move(description)) {}
+definition::~definition() = default;
 
 void
 definition::reserve(uint8_t count) {
@@ -79,6 +79,9 @@ definition::generate_c_header(std::ostream& o) const {
   o << "/* THIS FILE WAS AUTOMATICALLY GFNERATED USING DISTRAC!" << endl;
   o << " * BE AWARE OF POSSIBLE ISSUES WHEN EDITING AND RE-GENERATING! */" << endl;
   o << endl;
+  o << "#include <distrac/headers.h>" << endl;
+  o << "#include <distrac/types.h>" << endl;
+  o << endl;
   o << "#ifdef __cplusplus" << endl;
   o << "extern \"C\" {" << endl;
   o << "#endif" << endl;
@@ -96,6 +99,7 @@ definition::generate_c_header(std::ostream& o) const {
     for(const auto &prop : ev.definitions()) {
       std::string type = distrac_type_to_str(prop.type());
       boost::to_upper(type);
+      // NOLINTNEXTLINE
       type = "DISTRAC_TYPE_" + type;
       o << "  distrac_property_header{ \"" << prop.name() << "\", " << type << ", " << prop.has_causal_dependency() << ", " << std::to_string(prop.causal_dependency_property_id()) << " }," << endl;
     }
