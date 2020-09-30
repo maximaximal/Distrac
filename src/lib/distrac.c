@@ -21,6 +21,8 @@
 #include <threads.h>
 #endif
 
+#include <distrac_export.h>
+
 typedef struct distrac_internal {
   atomic_bool pushable;
   mtx_t writer_mtx;
@@ -183,7 +185,7 @@ init_definition_events(distrac_definition* def) {
   }
 }
 
-void
+DISTRAC_EXPORT void
 distrac_init(distrac_handle* handle,
              distrac_definition_function def_func,
              const char* working_directory,
@@ -242,7 +244,7 @@ distrac_init(distrac_handle* handle,
   atomic_store(&handle->internal->pushable, true);
 }
 
-void
+DISTRAC_EXPORT void
 distrac_push(distrac_handle* handle, void* event, uint8_t event_type) {
   assert(handle);
   assert(handle->internal);
@@ -273,7 +275,7 @@ distrac_push(distrac_handle* handle, void* event, uint8_t event_type) {
   mtx_unlock(&handle->internal->writer_mtx);
 }
 
-void
+DISTRAC_EXPORT void
 distrac_finalize(distrac_handle* handle, int64_t offset_ns) {
   assert(handle);
   distrac_definition* def = &handle->definition;
@@ -327,7 +329,7 @@ distrac_finalize(distrac_handle* handle, int64_t offset_ns) {
   remove_temp_files(handle);
 }
 
-void
+DISTRAC_EXPORT void
 distrac_destroy(distrac_handle* handle) {
   assert(handle);
   assert(handle->internal);

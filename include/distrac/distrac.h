@@ -66,12 +66,18 @@ distrac_destroy(distrac_handle* handle);
 
 class distrac_wrapper : public distrac_handle {
   public:
-  distrac_wrapper(distrac_definition_function func,
-                  const char* working_directory,
-                  const char* output_path,
-                  distrac_id node_id,
-                  const char* node_name,
-                  const char* program_name) {
+  distrac_wrapper() {}
+  ~distrac_wrapper() {
+    if(_initialized)
+      distrac_destroy(this);
+  }
+
+  void init(distrac_definition_function func,
+            const char* working_directory,
+            const char* output_path,
+            distrac_id node_id,
+            const char* node_name,
+            const char* program_name) {
     distrac_init(this,
                  func,
                  working_directory,
@@ -79,8 +85,12 @@ class distrac_wrapper : public distrac_handle {
                  node_id,
                  node_name,
                  program_name);
+
+    _initialized = true;
   }
-  ~distrac_wrapper() { distrac_destroy(this); }
+
+  private:
+  bool _initialized = false;
 };
 #endif
 

@@ -92,7 +92,7 @@ definition::generate_c_header(std::ostream& o) const {
   o << "};" << endl;
   o << endl;
   for(const auto &ev : _definitions) {
-    o << "distrac_property_header *" << prefix() << "ev" << std::to_string(ev.id()) << "_property_headers[" << ev.property_count() << "] = {" << endl;
+    o << "distrac_property_header " << prefix() << "ev" << std::to_string(ev.id()) << "_property_headers[" << ev.property_count() << "] = {" << endl;
     for(const auto &prop : ev.definitions()) {
       std::string type = distrac_type_to_str(prop.type());
       boost::to_upper(type);
@@ -102,7 +102,7 @@ definition::generate_c_header(std::ostream& o) const {
     o << "};" << endl;
   }
   o << endl;
-  o << "distrac_property_header " << prefix() << "property_headers[" << _definitions.size() << "] = {" << endl;
+  o << "distrac_property_header *" << prefix() << "property_headers[" << _definitions.size() << "] = {" << endl;
   for(const auto &ev : _definitions) {
     o << "  " << prefix() << "ev" << std::to_string(ev.id()) << "_property_headers," << endl;
   }
@@ -118,7 +118,7 @@ definition::generate_c_header(std::ostream& o) const {
   o << endl;
   o << "extern distrac_event_header *" << prefix() << "event_headers;" << endl;
   for(const auto &ev : _definitions) {
-    o << "extern distrac_property_header *" << prefix() << "ev" << std::to_string(ev.id()) << "_property_headers;" << endl;
+    o << "extern distrac_property_header " << prefix() << "ev" << std::to_string(ev.id()) << "_property_headers;" << endl;
   }
   o << "extern distrac_property_header *" << prefix() << "property_headers;" << endl;
   o << "void " << prefix() << "distrac_definition(distrac_definition *def);" << endl;

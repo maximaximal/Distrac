@@ -23,6 +23,7 @@ enum distrac_type {
   DISTRAC_TYPE_DOUBLE,
   DISTRAC_TYPE_FLOAT,
   DISTRAC_TYPE_BOOL,
+  DISTRAC_TYPE_PARAC_PATH,
   DISTRAC_TYPE__COUNT
 };
 
@@ -33,6 +34,16 @@ typedef struct distrac_ipv4 {
 typedef struct distrac_ipv6 {
   uint16_t segments[8];
 } distrac_ipv6;
+
+typedef struct distrac_parac_path {
+  union {
+    struct {
+      uint8_t length : 6;
+      uint64_t path : 58;
+    };
+    uint64_t rep;
+  };
+} distrac_parac_path;
 
 typedef int64_t distrac_id;
 
@@ -72,6 +83,70 @@ operator<<(std::ostream& o, const distrac_ipv6& ipv6) {
   return o;
 }
 
+inline std::ostream&
+operator<<(std::ostream& o, const distrac_parac_path p) {
+  char out_str[64];
+  if(p.length == 0) {
+    size_t i = 0;
+    out_str[i++] = '(';
+    out_str[i++] = 'r';
+    out_str[i++] = 'o';
+    out_str[i++] = 'o';
+    out_str[i++] = 't';
+    out_str[i++] = ')';
+    out_str[i++] = '\0';
+    return o << out_str;
+  } else if(p.length == 0b00111110u) {
+    size_t i = 0;
+    out_str[i++] = '(';
+    out_str[i++] = 'e';
+    out_str[i++] = 'x';
+    out_str[i++] = 'p';
+    out_str[i++] = 'l';
+    out_str[i++] = 'i';
+    out_str[i++] = 'c';
+    out_str[i++] = 'i';
+    out_str[i++] = 't';
+    out_str[i++] = 'l';
+    out_str[i++] = 'y';
+    out_str[i++] = ' ';
+    out_str[i++] = 'u';
+    out_str[i++] = 'n';
+    out_str[i++] = 'k';
+    out_str[i++] = 'n';
+    out_str[i++] = 'o';
+    out_str[i++] = 'w';
+    out_str[i++] = 'n';
+    out_str[i++] = ')';
+    out_str[i++] = '\0';
+    return o << out_str;
+  } else if(p.length >= 58) {
+    size_t i = 0;
+    out_str[i++] = 'I';
+    out_str[i++] = 'N';
+    out_str[i++] = 'V';
+    out_str[i++] = 'A';
+    out_str[i++] = 'L';
+    out_str[i++] = 'I';
+    out_str[i++] = 'D';
+    out_str[i++] = ' ';
+    out_str[i++] = 'P';
+    out_str[i++] = 'A';
+    out_str[i++] = 'T';
+    out_str[i++] = 'H';
+    out_str[i++] = '\0';
+    return o << out_str;
+  }
+
+  const uint64_t long1 = 1u;
+  for(size_t i = 0; i < 58; ++i) {
+    out_str[i] =
+      (p.rep & (long1 << ((sizeof(distrac_parac_path) * 8) - 1 - i))) + '0';
+  }
+  out_str[p.length] = '\0';
+  return o << out_str;
+}
+
 template<typename Functor>
 void
 distrac_memory_to_type(const uint8_t* mem,
@@ -104,6 +179,8 @@ distrac_memory_to_type(const uint8_t* mem,
       return func(*reinterpret_cast<const float*>(mem));
     case DISTRAC_TYPE_BOOL:
       return func(*reinterpret_cast<const uint8_t*>(mem));
+    case DISTRAC_TYPE_PARAC_PATH:
+      return func(*reinterpret_cast<const distrac_parac_path*>(mem));
 
     case DISTRAC_TYPE__COUNT:
       assert(false);
@@ -130,7 +207,8 @@ typedef std::variant<uint8_t,
                      distrac_ipv6,
                      double,
                      float,
-                     bool>
+                     bool,
+                     distrac_parac_path>
   distrac_type_variant;
 
 inline void

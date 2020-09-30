@@ -44,7 +44,8 @@ TEST_CASE("Distrac Push") {
     remove(output_file2);
   }
 
-  distrac_wrapper handle(
+  distrac_wrapper handle;
+  handle.init(
     [](distrac_definition* def) {
       def->file_header.event_count = 2;
       def->event_headers = event_headers;
@@ -77,7 +78,8 @@ TEST_CASE("Distrac Push") {
 
   distrac_finalize(&handle, 0);
 
-  distrac_wrapper handle2 = distrac_wrapper(
+  distrac_wrapper handle2;
+  handle2.init(
     [](distrac_definition* def) {
       def->file_header.event_count = 2;
       def->event_headers = event_headers;

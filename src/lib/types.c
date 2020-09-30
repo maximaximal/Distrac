@@ -34,6 +34,8 @@ distrac_type_to_str(enum distrac_type type) {
       return "float";
     case DISTRAC_TYPE_BOOL:
       return "bool";
+    case DISTRAC_TYPE_PARAC_PATH:
+      return "parac_path";
     case DISTRAC_TYPE__COUNT:
       assert(false);
   }
@@ -68,6 +70,8 @@ distrac_type_sizeof(enum distrac_type type) {
       return sizeof(float);
     case DISTRAC_TYPE_BOOL:
       return sizeof(uint8_t);
+    case DISTRAC_TYPE_PARAC_PATH:
+      return sizeof(distrac_parac_path);
     case DISTRAC_TYPE__COUNT:
       assert(false);
   }
@@ -92,6 +96,7 @@ distrac_type_required_padding(enum distrac_type type) {
     case DISTRAC_TYPE_UINT64:
     case DISTRAC_TYPE_INT64:
     case DISTRAC_TYPE_DOUBLE:
+    case DISTRAC_TYPE_PARAC_PATH:
       return 3;
     case DISTRAC_TYPE__COUNT:
       assert(false);
