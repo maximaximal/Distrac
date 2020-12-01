@@ -127,6 +127,24 @@ definition::generate_c_header(std::ostream& o) const {
   o << "extern distrac_property_header *" << prefix() << "property_headers;" << endl;
   o << "void " << prefix() << "distrac_definition(distrac_definition *def);" << endl;
   o << endl;
+  for(const auto &ev : _definitions) {
+    o << "typedef struct " << prefix() << "ev_" << ev.name() << " {" << endl;
+    for(const auto &def : ev.definitions()) {
+      o << "  " << distrac_type_to_cname(def.type()) << " " << def.name() << ";" << endl;
+    }
+    o << "} " << prefix() << "ev_" << ev.name() << ";" << endl;
+  }
+  o << endl;
+  o << "enum " << prefix() << "events {" << endl;
+  std::string prefixUpper = prefix();
+  std::transform(prefixUpper.begin(), prefixUpper.end(),prefixUpper.begin(), ::toupper);
+  for(const auto &ev : _definitions) {
+    std::string nameUpper = ev.name();
+    std::transform(nameUpper.begin(), nameUpper.end(),nameUpper.begin(), ::toupper);
+    o << "  " << prefixUpper << "EV_" << nameUpper << " = " << std::to_string(ev.id()) << "," << endl;
+  }
+  o << "};" << endl;
+  o << endl;
   o << "#endif" << endl;
   o << endl;
   o << "#ifdef __cplusplus" << endl;

@@ -5,6 +5,12 @@
 extern "C" {
 #endif
 
+#define DISTRAC_PARAC_PATH_MAX_LENGTH 58
+#define DISTRAC_PARAC_PATH_EXPLICITLY_UNKNOWN 0b00111110u
+#define DISTRAC_PARAC_PATH_PARSER 0b00111101u
+#define DISTRAC_PARAC_PATH_BITS 58u
+#define DISTRAC_PARAC_PATH_LENGTH_BITS 6u
+
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -35,13 +41,13 @@ typedef struct distrac_ipv6 {
   uint16_t segments[8];
 } distrac_ipv6;
 
-typedef struct distrac_parac_path {
-  union {
-    struct {
+typedef struct __attribute__((__packed__)) distrac_parac_path {
+  union __attribute__((__packed__)) {
+    struct __attribute__((__packed__)) {
       uint8_t length : 6;
       uint64_t path : 58;
     };
-    uint64_t rep;
+    uint64_t rep : 64;
   };
 } distrac_parac_path;
 
@@ -50,8 +56,14 @@ typedef int64_t distrac_id;
 const char*
 distrac_type_to_str(enum distrac_type type);
 
+const char*
+distrac_type_to_cname(enum distrac_type type);
+
 size_t
 distrac_type_sizeof(enum distrac_type type);
+
+void
+distrac_parac_path_to_str(distrac_parac_path p, char* out_str);
 
 // Either 0, 1, 2 or 3. Specifies the shift count.
 size_t
@@ -86,64 +98,7 @@ operator<<(std::ostream& o, const distrac_ipv6& ipv6) {
 inline std::ostream&
 operator<<(std::ostream& o, const distrac_parac_path p) {
   char out_str[64];
-  if(p.length == 0) {
-    size_t i = 0;
-    out_str[i++] = '(';
-    out_str[i++] = 'r';
-    out_str[i++] = 'o';
-    out_str[i++] = 'o';
-    out_str[i++] = 't';
-    out_str[i++] = ')';
-    out_str[i++] = '\0';
-    return o << out_str;
-  } else if(p.length == 0b00111110u) {
-    size_t i = 0;
-    out_str[i++] = '(';
-    out_str[i++] = 'e';
-    out_str[i++] = 'x';
-    out_str[i++] = 'p';
-    out_str[i++] = 'l';
-    out_str[i++] = 'i';
-    out_str[i++] = 'c';
-    out_str[i++] = 'i';
-    out_str[i++] = 't';
-    out_str[i++] = 'l';
-    out_str[i++] = 'y';
-    out_str[i++] = ' ';
-    out_str[i++] = 'u';
-    out_str[i++] = 'n';
-    out_str[i++] = 'k';
-    out_str[i++] = 'n';
-    out_str[i++] = 'o';
-    out_str[i++] = 'w';
-    out_str[i++] = 'n';
-    out_str[i++] = ')';
-    out_str[i++] = '\0';
-    return o << out_str;
-  } else if(p.length >= 58) {
-    size_t i = 0;
-    out_str[i++] = 'I';
-    out_str[i++] = 'N';
-    out_str[i++] = 'V';
-    out_str[i++] = 'A';
-    out_str[i++] = 'L';
-    out_str[i++] = 'I';
-    out_str[i++] = 'D';
-    out_str[i++] = ' ';
-    out_str[i++] = 'P';
-    out_str[i++] = 'A';
-    out_str[i++] = 'T';
-    out_str[i++] = 'H';
-    out_str[i++] = '\0';
-    return o << out_str;
-  }
-
-  const uint64_t long1 = 1u;
-  for(size_t i = 0; i < 58; ++i) {
-    out_str[i] =
-      (p.rep & (long1 << ((sizeof(distrac_parac_path) * 8) - 1 - i))) + '0';
-  }
-  out_str[p.length] = '\0';
+  distrac_parac_path_to_str(p, out_str);
   return o << out_str;
 }
 
