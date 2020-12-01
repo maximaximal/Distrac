@@ -244,14 +244,23 @@ distrac_init(distrac_handle* handle,
   atomic_store(&handle->internal->pushable, true);
 }
 
-DISTRAC_EXPORT void
+DISTRAC_EXPORT int64_t
+distrac_current_time(distrac_handle* handle) {
+  struct timespec current_time;
+  clock_gettime(CLOCK_MONOTONIC, &current_time);
+  int64_t ns_diff =
+    compute_time_diff_ns(handle->internal->init_time, current_time);
+  return ns_diff;
+}
+
+DISTRAC_EXPORT int64_t
 distrac_push(distrac_handle* handle, void* event, uint8_t event_type) {
   assert(handle);
   assert(handle->internal);
   assert(event);
 
   if(!atomic_load(&handle->internal->pushable)) {
-    return;
+    return 0;
   }
 
   struct timespec current_time;
@@ -273,6 +282,8 @@ distrac_push(distrac_handle* handle, void* event, uint8_t event_type) {
   fwrite(event, event_size, 1, handle->internal->output_files[event_type]);
 
   mtx_unlock(&handle->internal->writer_mtx);
+
+  return ns_diff;
 }
 
 DISTRAC_EXPORT void

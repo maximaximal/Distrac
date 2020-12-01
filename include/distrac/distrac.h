@@ -37,7 +37,10 @@ distrac_init(distrac_handle* handle,
              const char* node_name,
              const char* program_name);
 
-void
+int64_t
+distrac_current_time(distrac_handle* handle);
+
+int64_t
 distrac_push(distrac_handle* handle, void* event, uint8_t event_type);
 
 void
