@@ -29,7 +29,7 @@ event::event(const event& ev)
   }
 }
 
-  event::~event() = default;
+event::~event() = default;
 
 void
 event::init_properties() {
@@ -37,7 +37,9 @@ event::init_properties() {
   std::size_t offset = 0;
   for(auto& definition : _def.definitions()) {
     _properties.emplace_back(distrac::property(*this, definition, offset));
-    offset += definition.size();
+    if(definition.name()[0] != '_') {
+      offset += definition.size();
+    }
   }
 }
 

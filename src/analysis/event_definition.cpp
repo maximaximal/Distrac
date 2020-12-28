@@ -34,6 +34,8 @@ event_definition::~event_definition() = default;
 
 std::size_t
 event_definition::property_size(std::size_t id) const {
+  if(id == DISTRAC_PROPERTY_ID)
+    return 0;
   const property_definition& def = definition(id);
   return def.size();
 }

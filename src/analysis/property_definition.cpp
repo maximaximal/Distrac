@@ -1,3 +1,4 @@
+#include "distrac/headers.h"
 #include "distrac/types.h"
 #include <distrac/analysis/event_definition.hpp>
 #include <distrac/analysis/property_definition.hpp>
@@ -7,6 +8,8 @@ size_t
 property_definition::offset(const event_definition& ev) {
   size_t offset = 0;
   for(size_t prop_id = 0; prop_id < ev.property_count(); ++prop_id) {
+    if(prop_id == DISTRAC_PROPERTY_ID)
+      continue;
     offset += ev.property_size(prop_id);
   }
   return offset;

@@ -69,7 +69,8 @@ tracefile::print_summary() {
     cout << "    Node " << node.name() << " (Hostname: " << node.hostname()
          << "):" << endl;
     cout << "      Program: " << node.program() << endl;
-    cout << "      Internal Node Number: " << node.tracefile_location_index() << endl;
+    cout << "      Internal Node Number: " << node.tracefile_location_index()
+         << endl;
     cout << "      ID: " << node.id() << endl;
     for(size_t ev = 0; ev < event_definitions().size(); ++ev) {
       cout << "      " << node.event_count(ev) << " "
@@ -115,7 +116,7 @@ tracefile::scan() {
 
     event_definition ev_definition{ ev_header, ev };
 
-    for(uint8_t prop = 0; prop < ev_header.property_count; ++prop) {
+    for(uint8_t prop = 1; prop < ev_header.property_count + 1; ++prop) {
       const auto& prop_header = read_struct<distrac_property_header>(pos);
       ev_definition.add_property_definition(
         property_definition{ prop_header, prop });
