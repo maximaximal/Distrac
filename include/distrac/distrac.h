@@ -5,7 +5,7 @@
 #include <distrac/types.h>
 
 #define DISTRAC_MAX_EVENT_COUNT 255
-#define DISTRAC_MAX_EVENT_SIZE 255
+#define DISTRAC_MAX_EVENT_SIZE 254
 
 #define DISTRAC_FILE_SIGNATURE 0xD152403
 

@@ -25,7 +25,7 @@ class event {
   bool valid() const { return valid(_number); };
   bool valid(uint64_t number) const;
   uint8_t id() const;
-  distrac_id node_id() const;
+  const distrac_id& node_id() const;
   size_t node_tracefile_location_index() const;
 
   void set_number(uint64_t number) const { _number = number; }

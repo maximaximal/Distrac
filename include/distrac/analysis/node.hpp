@@ -18,7 +18,7 @@ class node {
        size_t tracefile_location_index);
   ~node();
 
-  distrac_id id() const { return _id; }
+  const distrac_id& id() const { return _id; }
   size_t tracefile_location_index() const { return _tracefile_location_index; }
   const std::string& name() const { return _name; }
   const std::string& hostname() const { return _hostname; }

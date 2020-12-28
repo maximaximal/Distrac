@@ -13,6 +13,8 @@ extern "C" {
 #define DISTRAC_LONGNAME_LENGTH 255
 #define DISTRAC_DESCRIPTION_LENGTH 255
 
+#define DISTRAC_PROPERTY_ID 0
+
 typedef struct distrac_version {
   uint8_t major;
   uint8_t minor;

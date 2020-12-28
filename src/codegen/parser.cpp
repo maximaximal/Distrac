@@ -211,7 +211,7 @@ parser::generate_definition(parser_def::definition& def) {
         static_cast<uint8_t>(after_event_id));
     }
 
-    uint8_t prop_id = 0;
+    uint8_t prop_id = 1;
     for(auto& prop : ev.properties) {
       if(prop.name.size() > DISTRAC_NAME_LENGTH) {
         return parser_error{ "Property \"" + prop.name + "\" in event \"" +
@@ -246,7 +246,6 @@ parser::generate_definition(parser_def::definition& def) {
         const event_definition& after_event =
           out_def.definitions()[ev_def.causal_dependency_event_id()];
         ssize_t match_property_id = after_event.get_property_id(match);
-
         if(match_property_id == -1) {
           return parser_error{
             "Property \"" + prop.name + "\" in event \"" + ev.name +

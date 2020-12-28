@@ -1,4 +1,5 @@
 #include "distrac/analysis/property_definition.hpp"
+#include "distrac/headers.h"
 #include "distrac/types.h"
 #include <distrac/analysis/event.hpp>
 #include <distrac/analysis/property.hpp>
@@ -24,7 +25,11 @@ property::type() const {
 
 const uint8_t*
 property::memory() const {
-  return _event->properties_memory() + _offset;
+  if(_def.id() == DISTRAC_PROPERTY_ID) {
+    return reinterpret_cast<const uint8_t*>(&_event->node_id());
+  } else {
+    return _event->properties_memory() + _offset;
+  }
 }
 
 std::ostream&

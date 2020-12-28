@@ -57,7 +57,7 @@ event::id() const {
   return _def.id();
 }
 
-distrac_id
+const distrac_id&
 event::node_id() const {
   return _node.id();
 }

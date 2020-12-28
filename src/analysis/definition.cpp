@@ -1,3 +1,4 @@
+#include "distrac/headers.h"
 #include "distrac/types.h"
 #include <distrac/analysis/definition.hpp>
 #include <distrac/analysis/event_definition.hpp>
@@ -81,6 +82,7 @@ definition::generate_c_header(std::ostream& o) const {
   o << endl;
   o << "#include <distrac/headers.h>" << endl;
   o << "#include <distrac/types.h>" << endl;
+  o << "#include <distrac/distrac.h>" << endl;
   o << endl;
   o << "#ifdef __cplusplus" << endl;
   o << "extern \"C\" {" << endl;
@@ -90,13 +92,15 @@ definition::generate_c_header(std::ostream& o) const {
   o << endl;
   o << "distrac_event_header " << prefix() << "event_headers[" << _definitions.size() << "] = {" << endl;
   for(const auto &ev : _definitions) {
-    o << "  distrac_event_header{\"" << ev.name() << "\", \"" << ev.description() << "\", " << ev.has_causal_dependency() << ", " << std::to_string(ev.causal_dependency_event_id()) << ", " << ev.property_count() << " }," << endl;
+    o << "  distrac_event_header{\"" << ev.name() << "\", \"" << ev.description() << "\", " << ev.has_causal_dependency() << ", " << std::to_string(ev.causal_dependency_event_id()) << ", " << ev.property_count() - 1 << " }," << endl;
   }
   o << "};" << endl;
   o << endl;
   for(const auto &ev : _definitions) {
-    o << "distrac_property_header " << prefix() << "ev" << std::to_string(ev.id()) << "_property_headers[" << ev.property_count() << "] = {" << endl;
+    o << "distrac_property_header " << prefix() << "ev" << std::to_string(ev.id()) << "_property_headers[" << ev.property_count() - 1 << "] = {" << endl;
     for(const auto &prop : ev.definitions()) {
+      if(prop.id() == DISTRAC_PROPERTY_ID) continue;
+
       std::string type = distrac_type_to_str(prop.type());
       boost::to_upper(type);
       // NOLINTNEXTLINE
@@ -130,6 +134,7 @@ definition::generate_c_header(std::ostream& o) const {
   for(const auto &ev : _definitions) {
     o << "typedef struct " << prefix() << "ev_" << ev.name() << " {" << endl;
     for(const auto &def : ev.definitions()) {
+      if(def.id() == DISTRAC_PROPERTY_ID) continue;
       o << "  " << distrac_type_to_cname(def.type()) << " " << def.name() << ";" << endl;
     }
     o << "} " << prefix() << "ev_" << ev.name() << ";" << endl;

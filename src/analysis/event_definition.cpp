@@ -1,4 +1,5 @@
 #include "distrac/headers.h"
+#include "distrac/types.h"
 #include <distrac/analysis/event_definition.hpp>
 #include <distrac/analysis/property_definition.hpp>
 
@@ -8,13 +9,16 @@ event_definition::event_definition(std::string name,
                                    std::string description)
   : _name(std::move(name))
   , _id(id)
-  , _description(std::move(description)) {}
+  , _description(std::move(description)) {
+  add_property_definition({ "_id", DISTRAC_TYPE_UINT64, 0 });
+}
 event_definition::event_definition(const distrac_event_header& header,
                                    uint8_t id)
   : _name(header.name)
   , _id(id)
   , _description(header.description) {
-  _defs.reserve(header.property_count);
+  _defs.reserve(header.property_count + 1);
+  add_property_definition({ "_id", DISTRAC_TYPE_UINT64, 0 });
 }
 event_definition::event_definition(const event_definition& o)
   : _name(o._name)
@@ -37,7 +41,9 @@ event_definition::property_size(std::size_t id) const {
 void
 event_definition::add_property_definition(const property_definition& def) {
   _defs.push_back(def);
-  _size += def.size();
+  if(def.name()[0] != '_') {
+    _size += def.size();
+  }
   _defs_map.insert({ def.name(), _defs[_defs.size() - 1] });
 }
 

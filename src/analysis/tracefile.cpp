@@ -69,7 +69,7 @@ tracefile::print_summary() {
     cout << "    Node " << node.name() << " (Hostname: " << node.hostname()
          << "):" << endl;
     cout << "      Program: " << node.program() << endl;
-    cout << "      Internal Node Number: " << node.offset_ns() << endl;
+    cout << "      Internal Node Number: " << node.tracefile_location_index() << endl;
     cout << "      ID: " << node.id() << endl;
     for(size_t ev = 0; ev < event_definitions().size(); ++ev) {
       cout << "      " << node.event_count(ev) << " "
