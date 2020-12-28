@@ -31,6 +31,10 @@ property::memory() const {
     return _event->properties_memory() + _offset;
   }
 }
+std::size_t
+property::size() const {
+  return _def.size();
+}
 
 std::ostream&
 operator<<(std::ostream& o, const property& p) {

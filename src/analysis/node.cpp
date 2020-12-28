@@ -69,4 +69,10 @@ event_iterator
 node::end() const {
   return event_iterator();
 }
+
+event
+node::get_event(uint8_t id, uint64_t number) const {
+  assert(id < _trace.event_definitions().size());
+  return event(_trace.event_definitions()[id], *this, number);
+}
 }

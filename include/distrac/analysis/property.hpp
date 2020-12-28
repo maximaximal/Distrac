@@ -23,6 +23,7 @@ class property {
   const std::string& name() const;
   distrac_type type() const;
   std::size_t offset() const { return _offset; };
+  std::size_t size() const;
 
   const uint8_t* memory() const;
 

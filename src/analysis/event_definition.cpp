@@ -16,7 +16,9 @@ event_definition::event_definition(const distrac_event_header& header,
                                    uint8_t id)
   : _name(header.name)
   , _id(id)
-  , _description(header.description) {
+  , _description(header.description)
+  , _has_causal_dependency(header.enable_after_constraint)
+  , _causal_dependency_event_id(header.after_event_id) {
   _defs.reserve(header.property_count + 1);
   add_property_definition({ "_id", DISTRAC_TYPE_UINT64, 0 });
 }
@@ -34,8 +36,6 @@ event_definition::~event_definition() = default;
 
 std::size_t
 event_definition::property_size(std::size_t id) const {
-  if(id == DISTRAC_PROPERTY_ID)
-    return 0;
   const property_definition& def = definition(id);
   return def.size();
 }

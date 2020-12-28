@@ -3,6 +3,7 @@
 #include "distrac/types.h"
 
 #include <distrac/analysis/definition.hpp>
+#include <distrac/analysis/entry_matcher.hpp>
 #include <distrac/analysis/event_definition.hpp>
 #include <distrac/analysis/event_iterator.hpp>
 #include <distrac/analysis/property_definition.hpp>
@@ -136,6 +137,19 @@ tracefile::scan() {
 
     _nodes.push_back(std::move(n));
   }
+
+  // Calculate correct offsets
+  /*
+  for(const auto &ev_def : _definition.definitions()) {
+    if(ev_def.has_causal_dependency()) {
+      entrymatcher matcher(_definition, ev_def, _nodes);
+      auto offsets = matcher.run();
+      for(size_t i = 0; i < offsets.size(); ++i) {
+        clog << "Offset [" << i << "] = " << offsets[i] << endl;
+      }
+    }
+  }
+  */
 }
 
 void

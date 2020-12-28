@@ -35,6 +35,8 @@ class node {
   event_iterator begin() const;
   event_iterator end() const;
 
+  event get_event(uint8_t id, uint64_t number = 0) const;
+
   private:
   const distrac_node_header& _header;
   distrac_id _id;

@@ -24,6 +24,7 @@ set(DISTRAC_ANALYSIS_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/analysis/property.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/analysis/tracefile.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/analysis/node.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/analysis/entry_matcher.cpp
     PARENT_SCOPE)
 
 set(DISTRAC_CODEGEN_BIN_SRCS

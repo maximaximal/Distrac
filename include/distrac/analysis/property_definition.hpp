@@ -18,7 +18,9 @@ class property_definition {
   property_definition(const distrac_property_header& header, uint8_t id)
     : _name(header.name)
     , _type(static_cast<distrac_type>(header.datatype))
-    , _id(id) {}
+    , _id(id)
+    , _has_causal_dependency(header.enable_after_constraint)
+    , _causal_dependency_property_id(header.after_event_property) {}
   ~property_definition() {}
 
   const std::string& name() const { return _name; }
