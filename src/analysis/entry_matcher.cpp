@@ -10,6 +10,8 @@
 #include <boost/functional/hash.hpp>
 #include <iostream>
 
+#include <boost/unordered_map.hpp>
+
 // Taken from https://stackoverflow.com/a/10405129
 template<typename Container>
 struct container_hash {
@@ -31,7 +33,7 @@ entrymatcher::offsetvector
 entrymatcher::run() {
   offsetvector offsets(_nodes.size());
 
-  event_iterator it;
+  event_iterator it(false /* Do not respect offsets! */);
 
   assert(_ev_def.has_causal_dependency());
   auto depid = _ev_def.causal_dependency_event_id();
@@ -44,7 +46,7 @@ entrymatcher::run() {
 
   // Iterate over all events and match the dependency to this event using an
   // unordered_map.
-  std::unordered_map<memoryvector, int64_t, container_hash<memoryvector>>
+  boost::unordered_map<memoryvector, int64_t, container_hash<memoryvector>>
     memory;
 
   memoryvector key;
@@ -62,12 +64,12 @@ entrymatcher::run() {
         // The dependency is AFTER the event that would depend on it! Offset
         // must be applied to the node the event was found in.
         auto& off = offsets[ev.node().tracefile_location_index()];
-        off = std::min(off, memoryIt->second - ev.timestamp_with_offset());
+        off = std::min(off, memoryIt->second - ev.timestamp() - 1);
       }
 
       memory.erase(memoryIt);
     } else {
-      memory.insert({ key, ev.timestamp_with_offset() });
+      memory.insert({ key, ev.timestamp() });
     }
   }
 

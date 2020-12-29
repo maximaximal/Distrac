@@ -5,6 +5,7 @@
 #include <distrac/analysis/event.hpp>
 #include <distrac/types.h>
 #include <forward_list>
+#include <functional>
 
 namespace distrac {
 class event_iterator {
@@ -17,7 +18,8 @@ class event_iterator {
   typedef size_t difference_type;
   typedef std::forward_list<event> event_list;
 
-  event_iterator() {}
+  event_iterator(bool respect_offset = true)
+    : _respect_offset(respect_offset) {}
   template<typename Iter>
   event_iterator(Iter Begin, Iter End) {
     add_events(Begin, End);
@@ -47,7 +49,12 @@ class event_iterator {
     }
 
     const auto& min =
-      std::min_element(_events.begin(), _events.end(), &compare_events_by_time);
+      std::min_element(_events.begin(),
+                       _events.end(),
+                       std::bind(&event_iterator::compare_events_by_time,
+                                 this,
+                                 std::placeholders::_1,
+                                 std::placeholders::_2));
     _current_event = &(*min);
 
     if(_current_event && !_current_event->valid()) {
@@ -55,14 +62,19 @@ class event_iterator {
     }
   }
 
-  static bool compare_events_by_time(const event& lhs, const event& rhs) {
+  bool compare_events_by_time(const event& lhs, const event& rhs) {
     if(lhs.valid() && !rhs.valid())
       return true;
     if(!lhs.valid() && rhs.valid())
       return false;
     if(!lhs.valid() && !rhs.valid())
       return false;
-    return lhs.timestamp_with_offset() < rhs.timestamp_with_offset();
+
+    if(_respect_offset) {
+      return lhs.timestamp_with_offset() < rhs.timestamp_with_offset();
+    } else {
+      return lhs.timestamp() < rhs.timestamp();
+    }
   }
 
   // PREFIX
@@ -120,5 +132,6 @@ class event_iterator {
   event_list _events;
   size_t _event_count = 0;
   const event* _current_event = nullptr;
+  const bool _respect_offset = true;
 };
 }

@@ -8,7 +8,7 @@
 #include <distrac/analysis/event_iterator.hpp>
 
 namespace distrac {
-node::node(const distrac_node_header& header,
+node::node(distrac_node_header& header,
            const tracefile& trace,
            size_t tracefile_location_index)
   : _header(header)
@@ -68,6 +68,15 @@ node::begin() const {
 event_iterator
 node::end() const {
   return event_iterator();
+}
+
+int64_t
+node::offset() const {
+  return _header.offset_ns;
+}
+void
+node::set_offset(int64_t offset) {
+  _header.offset_ns = offset;
 }
 
 event

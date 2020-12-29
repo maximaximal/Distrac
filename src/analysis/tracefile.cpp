@@ -11,6 +11,7 @@
 #include <distrac/analysis/util.hpp>
 
 #include <forward_list>
+#include <future>
 #include <iomanip>
 #include <iostream>
 
@@ -40,6 +41,7 @@ tracefile::tracefile(const std::string& path)
   }
 
   scan();
+  calculate_offsets();
 }
 tracefile::~tracefile() = default;
 
@@ -62,6 +64,8 @@ tracefile::print_summary() {
     cout << "    Event " << ev.name() << " (encountered "
          << event_count(ev.id()) << "x):" << endl;
     for(auto& prop : ev.definitions()) {
+      if(prop.name()[0] == '_')
+        continue;
       cout << "      Property " << prop.name() << " : " << prop.type() << endl;
     }
   }
@@ -72,6 +76,7 @@ tracefile::print_summary() {
     cout << "      Program: " << node.program() << endl;
     cout << "      Internal Node Number: " << node.tracefile_location_index()
          << endl;
+    cout << "      Offset NS: " << node.offset() << endl;
     cout << "      ID: " << node.id() << endl;
     for(size_t ev = 0; ev < event_definitions().size(); ++ev) {
       cout << "      " << node.event_count(ev) << " "
@@ -129,7 +134,7 @@ tracefile::scan() {
   // Parse nodes and event data.
   while(is_size_left(pos, sizeof(distrac_node_header))) {
     read_until_aligned(pos);
-    const auto& node_header = read_struct<distrac_node_header>(pos);
+    auto& node_header = read_struct<distrac_node_header>(pos);
 
     node n{ node_header, *this, _nodes.size() };
 
@@ -137,19 +142,33 @@ tracefile::scan() {
 
     _nodes.push_back(std::move(n));
   }
+}
 
-  // Calculate correct offsets
-  /*
-  for(const auto &ev_def : _definition.definitions()) {
+void
+tracefile::calculate_offsets() {
+  std::vector<entrymatcher> matchers;
+  std::vector<std::future<entrymatcher::offsetvector>> futures;
+
+  for(const auto& ev_def : _definition.definitions()) {
     if(ev_def.has_causal_dependency()) {
-      entrymatcher matcher(_definition, ev_def, _nodes);
-      auto offsets = matcher.run();
-      for(size_t i = 0; i < offsets.size(); ++i) {
-        clog << "Offset [" << i << "] = " << offsets[i] << endl;
-      }
+      matchers.emplace_back(_definition, ev_def, _nodes);
+      futures.push_back(std::async(
+        std::launch::async, std::bind(&entrymatcher::run, matchers.back())));
     }
   }
-  */
+
+  entrymatcher::offsetvector offsets(_nodes.size());
+
+  for(auto& f : futures) {
+    auto o = f.get();
+    for(std::size_t i = 0; i < o.size(); ++i) {
+      offsets[i] = std::min(o[i], offsets[i]);
+    }
+  }
+
+  for(std::size_t i = 0; i < _nodes.size(); ++i) {
+    _nodes[i].set_offset(offsets[i]);
+  }
 }
 
 void

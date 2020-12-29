@@ -13,7 +13,7 @@ class event;
 
 class node {
   public:
-  node(const distrac_node_header& header,
+  node(distrac_node_header& header,
        const tracefile& trace,
        size_t tracefile_location_index);
   ~node();
@@ -35,10 +35,13 @@ class node {
   event_iterator begin() const;
   event_iterator end() const;
 
+  int64_t offset() const;
+  void set_offset(int64_t offset);
+
   event get_event(uint8_t id, uint64_t number = 0) const;
 
   private:
-  const distrac_node_header& _header;
+  distrac_node_header& _header;
   distrac_id _id;
   size_t _tracefile_location_index;
   std::string _name;

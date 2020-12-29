@@ -2,9 +2,9 @@
 
 #include <chrono>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
-#include <set>
 
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/type_index.hpp>
@@ -31,7 +31,7 @@ class tracefile {
   void print_summary();
 
   const event_definition_vector& event_definitions() const;
-  ssize_t get_event_id(const std::string &name) const;
+  ssize_t get_event_id(const std::string& name) const;
 
   std::chrono::time_point<std::chrono::system_clock> trace_time_point() {
     return std::chrono::system_clock::time_point{ std::chrono::seconds{
@@ -58,10 +58,11 @@ class tracefile {
   size_t event_count(uint8_t ev) const;
 
   filtered_tracefile filtered(event_filter_func func) const;
-  filtered_tracefile filtered(const event_filter_set &event_ids) const;
+  filtered_tracefile filtered(const event_filter_set& event_ids) const;
 
   protected:
   void scan();
+  void calculate_offsets();
 
   template<typename T>
   T* try_read_struct(size_t& pos) {
@@ -75,7 +76,16 @@ class tracefile {
   }
 
   template<typename T>
-  const T& read_struct(size_t& pos) {
+  T& read_struct(size_t& pos) {
+    assert_size_left(
+      pos, sizeof(T), boost::typeindex::type_id<T>().pretty_name().c_str());
+    T& s = *reinterpret_cast<T*>(&_sink.data()[pos]);
+    pos += sizeof(T);
+    return s;
+  }
+
+  template<typename T>
+  const T& read_struct(size_t& pos) const {
     assert_size_left(
       pos, sizeof(T), boost::typeindex::type_id<T>().pretty_name().c_str());
     const T& s = *reinterpret_cast<T*>(&_sink.data()[pos]);
