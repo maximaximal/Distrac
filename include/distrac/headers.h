@@ -27,7 +27,7 @@ typedef struct distrac_node_header {
   char node_name[DISTRAC_LONGNAME_LENGTH];
   char node_hostname[DISTRAC_LONGNAME_LENGTH];
   char program_name[DISTRAC_LONGNAME_LENGTH];
-  distrac_version distrac_version;
+  distrac_version distrac_version_field;
   int64_t offset_ns;
 } distrac_node_header;
 

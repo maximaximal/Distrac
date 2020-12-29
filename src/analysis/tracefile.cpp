@@ -2,6 +2,7 @@
 #include "distrac/headers.h"
 #include "distrac/types.h"
 
+#include <chrono>
 #include <distrac/analysis/definition.hpp>
 #include <distrac/analysis/entry_matcher.hpp>
 #include <distrac/analysis/event_definition.hpp>
@@ -42,6 +43,7 @@ tracefile::tracefile(const std::string& path)
 
   scan();
   calculate_offsets();
+  calculate_beginAndEndTime();
 }
 tracefile::~tracefile() = default;
 
@@ -169,6 +171,33 @@ tracefile::calculate_offsets() {
   for(std::size_t i = 0; i < _nodes.size(); ++i) {
     _nodes[i].set_offset(offsets[i]);
   }
+}
+
+void
+tracefile::calculate_beginAndEndTime() {
+  int64_t begin_ns = 0;
+  int64_t end_ns = 0;
+
+  for(auto& node : _nodes) {
+    for(uint8_t ev_id = 0; ev_id < _definition.get_event_count(); ++ev_id) {
+      if(node.event_count(ev_id) == 0)
+        continue;
+
+      const auto first_event = node.get_event(ev_id, 0);
+      const auto last_event =
+        node.get_event(ev_id, node.event_count(ev_id) - 1);
+      begin_ns = std::min(begin_ns, first_event.timestamp_with_offset());
+      end_ns = std::max(end_ns, last_event.timestamp_with_offset());
+    }
+  }
+
+  // Convert into time points.
+  _begin_time =
+    time_point(std::chrono::seconds(_header->seconds_since_epoch_on_start) +
+               std::chrono::nanoseconds(begin_ns));
+  _end_time =
+    time_point(std::chrono::seconds(_header->seconds_since_epoch_on_start) +
+               std::chrono::nanoseconds(end_ns));
 }
 
 void

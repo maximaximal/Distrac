@@ -34,6 +34,10 @@ definition::get_event_id(const std::string& name) const {
     return -1;
   return it->second.id();
 }
+size_t
+definition::get_event_count() const {
+  return _definitions.size();
+}
 
 void
 definition::print_summary() const {

@@ -20,6 +20,7 @@ class definition {
 
   const event_definition_vector& definitions() const { return _definitions; }
   ssize_t get_event_id(const std::string& name) const;
+  size_t get_event_count() const;
 
   void reserve(uint8_t count);
   void add_definition(const event_definition& def);

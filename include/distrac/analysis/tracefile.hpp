@@ -33,12 +33,8 @@ class tracefile {
   const event_definition_vector& event_definitions() const;
   ssize_t get_event_id(const std::string& name) const;
 
-  std::chrono::time_point<std::chrono::system_clock> trace_time_point() {
-    return std::chrono::system_clock::time_point{ std::chrono::seconds{
-      _header->seconds_since_epoch_on_start } };
-  }
-  std::time_t trace_time() {
-    return std::chrono::system_clock::to_time_t(trace_time_point());
+  std::time_t trace_time() const {
+    return std::chrono::system_clock::to_time_t(trace_begin_time());
   }
 
   event_iterator begin() const;
@@ -60,9 +56,20 @@ class tracefile {
   filtered_tracefile filtered(event_filter_func func) const;
   filtered_tracefile filtered(const event_filter_set& event_ids) const;
 
+  using time_point = std::chrono::time_point<std::chrono::system_clock>;
+
+  const time_point& trace_begin_time() const { return _begin_time; }
+  const time_point& trace_end_time() const { return _end_time; }
+  int64_t trace_duration_ms() const {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(_end_time -
+                                                                 _begin_time)
+      .count();
+  }
+
   protected:
   void scan();
   void calculate_offsets();
+  void calculate_beginAndEndTime();
 
   template<typename T>
   T* try_read_struct(size_t& pos) {
@@ -112,5 +119,8 @@ class tracefile {
   boost::iostreams::mapped_file _sink;
 
   distrac_file_header* _header = nullptr;
+
+  time_point _begin_time;
+  time_point _end_time;
 };
 }

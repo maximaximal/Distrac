@@ -17,7 +17,7 @@ node::node(distrac_node_header& header,
   , _name(header.node_name)
   , _hostname(header.node_hostname)
   , _program(header.program_name)
-  , _distrac_verion(header.distrac_version)
+  , _distrac_verion(header.distrac_version_field)
   , _offset_ns(header.offset_ns)
   , _trace(trace) {
   _event_counts.resize(trace.event_definitions().size());

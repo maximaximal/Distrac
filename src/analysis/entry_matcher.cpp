@@ -38,10 +38,16 @@ entrymatcher::run() {
   assert(_ev_def.has_causal_dependency());
   auto depid = _ev_def.causal_dependency_event_id();
   assert(depid < _def.definitions().size());
+  const auto& depevent = _def.definitions()[depid];
+
+  std::size_t event_count = 0;
 
   for(const auto& node : _nodes) {
     it.add_event(node.get_event(depid));
     it.add_event(node.get_event(_ev_def.id()));
+
+    event_count += node.event_count(depid);
+    event_count += node.event_count(_ev_def.id());
   }
 
   // Iterate over all events and match the dependency to this event using an
@@ -51,7 +57,7 @@ entrymatcher::run() {
 
   memoryvector key;
 
-  for(; it != event_iterator(); ++it) {
+  for(std::size_t i = 1; it != event_iterator(); ++it, ++i) {
     const auto& ev = *it;
     criticalMemoryToVector(key, ev);
 
@@ -71,6 +77,13 @@ entrymatcher::run() {
     } else {
       memory.insert({ key, ev.timestamp() });
     }
+
+    if(i % 5000 == 0) {
+      std::clog << "  " << ((float)i / event_count)
+                << "% analyzed of dependency " << depevent.name() << " of "
+                << _ev_def.name() << ". Memory has " << memory.size()
+                << " entries." << std::endl;
+    }
   }
 
   return offsets;
@@ -82,7 +95,7 @@ entrymatcher::criticalMemoryToVector(std::vector<uint8_t>& out,
   out.clear();
   for(const auto& prop : _ev_def.definitions()) {
     if(prop.has_causal_dependency()) {
-      const auto& p = [this, source, prop]() {
+      const auto& p = [this, &source, &prop]() {
         if(source.id() == _ev_def.id()) {
           return source.property(prop.id());
         } else {
