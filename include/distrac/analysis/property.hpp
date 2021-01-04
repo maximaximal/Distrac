@@ -27,6 +27,12 @@ class property {
 
   const uint8_t* memory() const;
 
+  template<typename T>
+  const T& as() const {
+    assert(size() >= sizeof(T));
+    return *reinterpret_cast<const T*>(memory());
+  }
+
   private:
   const distrac::event* _event;
   const property_definition& _def;

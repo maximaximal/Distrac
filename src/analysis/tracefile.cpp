@@ -42,7 +42,9 @@ tracefile::tracefile(const std::string& path)
   }
 
   scan();
-  calculate_offsets();
+  if(requiresOffsetRecalculation()) {
+    calculate_offsets();
+  }
   calculate_beginAndEndTime();
 }
 tracefile::~tracefile() = default;
@@ -171,6 +173,8 @@ tracefile::calculate_offsets() {
   for(std::size_t i = 0; i < _nodes.size(); ++i) {
     _nodes[i].set_offset(offsets[i]);
   }
+
+  _header->number_of_nodes_with_aligned_offsets = _nodes.size();
 }
 
 void
@@ -198,6 +202,11 @@ tracefile::calculate_beginAndEndTime() {
   _end_time =
     time_point(std::chrono::seconds(_header->seconds_since_epoch_on_start) +
                std::chrono::nanoseconds(end_ns));
+}
+
+bool
+tracefile::requiresOffsetRecalculation() {
+  return _nodes.size() != _header->number_of_nodes_with_aligned_offsets;
 }
 
 void

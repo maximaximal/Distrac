@@ -163,6 +163,7 @@ init_definition(distrac_definition* def) {
   def->event_headers = NULL;
   def->property_headers = NULL;
   def->file_header.event_count = 0;
+  def->file_header.number_of_nodes_with_aligned_offsets = 0;
   strcpy(def->file_header.metadata, "(No Metadata)");
   strcpy(def->file_header.problem_name, "(No Problem Name)");
   strcpy(def->file_header.additional_info, "(No Additional Info)");

@@ -131,7 +131,7 @@ class event_iterator {
   private:
   event_list _events;
   size_t _event_count = 0;
-  const event* _current_event = nullptr;
-  const bool _respect_offset = true;
+  event* _current_event = nullptr;
+  bool _respect_offset = true;
 };
 }

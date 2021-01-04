@@ -71,6 +71,8 @@ class tracefile {
   void calculate_offsets();
   void calculate_beginAndEndTime();
 
+  bool requiresOffsetRecalculation();
+
   template<typename T>
   T* try_read_struct(size_t& pos) {
     if(is_size_left(pos, sizeof(T))) {
