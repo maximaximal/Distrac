@@ -59,6 +59,11 @@ event::id() const {
   return _def.id();
 }
 
+const std::string&
+event::ev_name() const {
+  return _def.name();
+}
+
 const distrac_id&
 event::node_id() const {
   return _node.id();

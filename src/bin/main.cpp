@@ -38,7 +38,7 @@ main(int argc, char* argv[]) {
     ("trace", po::value<std::string>(), "input file for tracing")
     ("omit-csv-header", po::bool_switch(&omit_csv_header), "omit the header of CSV output")
     ("print-summary,s", po::bool_switch(&print_summary), "print summary of tracefile")
-    ("print-event,e", po::value<std::string>(), "print all occurences of a given event name")
+    ("print-event,e", po::value<std::vector<std::string>>()->multitoken(), "print all occurences of given event names")
     ("print-node-count", po::bool_switch(&print_node_count), "print node count")
     ("select-nodes", po::value<std::vector<size_t>>()->multitoken(), "limit selection to given nodes (indexing based on internal node numbering, [0, N[)")
   ;
@@ -101,17 +101,22 @@ main(int argc, char* argv[]) {
   }
 
   if(vm.count("print-event")) {
-    std::string event_name = vm["print-event"].as<std::string>();
-    ssize_t event_id = tracefile.get_event_id(event_name);
-    if(event_id == -1) {
-      cerr << "!! Event \"" << event_name << "\" does not exist!" << endl;
-      return EXIT_FAILURE;
+    std::vector<std::string> event_names =
+      vm["print-event"].as<std::vector<std::string>>();
+    std::set<uint8_t> event_filter;
+
+    for(auto& ev : event_names) {
+      ssize_t event_id = tracefile.get_event_id(ev);
+      if(event_id == -1) {
+        cerr << "!! Event \"" << ev << "\" does not exist!" << endl;
+        return EXIT_FAILURE;
+      }
+      assert(event_id >= 0 && event_id < 255);
+      event_filter.insert(event_id);
     }
 
-    assert(event_id >= 0 && event_id < 255);
     bool first = !omit_csv_header;
-    for(const auto& ev :
-        tracefile.filtered({ static_cast<uint8_t>(event_id) })) {
+    for(const auto& ev : tracefile.filtered(event_filter)) {
       if(first) {
         ev.csv_header_out(std::cout) << endl;
         first = false;
@@ -121,6 +126,10 @@ main(int argc, char* argv[]) {
         if(!selected_nodes.count(ev.node_tracefile_location_index())) {
           continue;
         }
+      }
+
+      if(event_names.size() > 1) {
+        std::cout << ev.ev_name() << " ";
       }
 
       ev.csv_out(std::cout) << endl;

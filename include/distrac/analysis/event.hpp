@@ -25,6 +25,7 @@ class event {
   bool valid() const { return valid(_number); };
   bool valid(uint64_t number) const;
   uint8_t id() const;
+  const std::string& ev_name() const;
   const distrac_id& node_id() const;
   size_t node_tracefile_location_index() const;
 
