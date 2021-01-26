@@ -33,9 +33,6 @@ tracefile::tracefile(const std::string& path)
 
   _byte_size = _sink.size();
 
-  std::clog << "-> Opened trace of size " << BytePrettyPrint(_byte_size)
-            << std::endl;
-
   if(_byte_size < sizeof(distrac_file_header)) {
     std::cerr << "!! Trace file too small!" << std::endl;
     exit(EXIT_FAILURE);

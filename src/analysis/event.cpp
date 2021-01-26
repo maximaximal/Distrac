@@ -76,17 +76,17 @@ event::memory(uint64_t number) const {
 
 std::ostream&
 event::csv_header_out(std::ostream& o) const {
-  o << "Timestamp,Node Number";
+  o << "Timestamp Node_Number";
   for(const auto& prop : _properties) {
-    o << "," << prop.name();
+    o << " " << prop.name();
   }
   return o;
 }
 std::ostream&
 event::csv_out(std::ostream& o) const {
-  o << timestamp_with_offset() << "," << node_tracefile_location_index();
+  o << timestamp_with_offset() << " " << node_tracefile_location_index();
   for(const auto& prop : _properties) {
-    o << "," << prop;
+    o << " " << prop;
   }
   return o;
 }

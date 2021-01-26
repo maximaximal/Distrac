@@ -1,6 +1,7 @@
 #include <boost/program_options/value_semantic.hpp>
 #include <cstdlib>
 #include <iostream>
+#include <iterator>
 #include <memory>
 #include <stdexcept>
 
@@ -24,6 +25,8 @@ using std::endl;
 int
 main(int argc, char* argv[]) {
   bool print_summary = true;
+  bool print_node_count = true;
+  bool omit_csv_header = false;
 
   po::variables_map vm;
   po::options_description desc("Allowed options");
@@ -33,8 +36,11 @@ main(int argc, char* argv[]) {
   desc.add_options()
     ("help", "produce help message")
     ("trace", po::value<std::string>(), "input file for tracing")
+    ("omit-csv-header", po::bool_switch(&omit_csv_header), "omit the header of CSV output")
     ("print-summary,s", po::bool_switch(&print_summary), "print summary of tracefile")
     ("print-event,e", po::value<std::string>(), "print all occurences of a given event name")
+    ("print-node-count", po::bool_switch(&print_node_count), "print node count")
+    ("select-nodes", po::value<std::vector<size_t>>()->multitoken(), "limit selection to given nodes (indexing based on internal node numbering, [0, N[)")
   ;
   posDesc.add("trace", -1);
     // clang-format on
@@ -72,8 +78,26 @@ main(int argc, char* argv[]) {
 
   distrac::tracefile tracefile(trace);
 
+  if(print_node_count) {
+    cout << tracefile.node_count() << endl;
+  }
+
   if(print_summary) {
     tracefile.print_summary();
+  }
+
+  std::set<size_t> selected_nodes;
+  if(vm.count("select-nodes")) {
+    auto s = vm["select-nodes"].as<std::vector<size_t>>();
+    selected_nodes = std::set<size_t>(s.begin(), s.end());
+
+    for(auto n : selected_nodes) {
+      if(n >= tracefile.node_count()) {
+        cerr << "!! Node number " << n
+             << " does not exist, as the node count is only "
+             << tracefile.node_count() << "!" << endl;
+      }
+    }
   }
 
   if(vm.count("print-event")) {
@@ -85,13 +109,20 @@ main(int argc, char* argv[]) {
     }
 
     assert(event_id >= 0 && event_id < 255);
-    bool first = true;
+    bool first = !omit_csv_header;
     for(const auto& ev :
         tracefile.filtered({ static_cast<uint8_t>(event_id) })) {
       if(first) {
         ev.csv_header_out(std::cout) << endl;
         first = false;
       }
+
+      if(selected_nodes.size()) {
+        if(!selected_nodes.count(ev.node_tracefile_location_index())) {
+          continue;
+        }
+      }
+
       ev.csv_out(std::cout) << endl;
     }
   }

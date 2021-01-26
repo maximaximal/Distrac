@@ -66,6 +66,8 @@ class tracefile {
       .count();
   }
 
+  size_t node_count() const { return _nodes.size(); }
+
   protected:
   void scan();
   void calculate_offsets();
