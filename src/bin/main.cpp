@@ -26,6 +26,8 @@ int
 main(int argc, char* argv[]) {
   bool print_summary = true;
   bool print_node_count = true;
+  bool print_start_ns = true;
+  bool print_end_ns = true;
   bool omit_csv_header = false;
   bool force_causal_sync = false;
 
@@ -42,6 +44,8 @@ main(int argc, char* argv[]) {
     ("print-summary,s", po::bool_switch(&print_summary), "print summary of tracefile")
     ("print-event,e", po::value<std::vector<std::string>>()->multitoken(), "print all occurences of given event names")
     ("print-node-count", po::bool_switch(&print_node_count), "print node count")
+    ("print-start-ns", po::bool_switch(&print_start_ns), "print start time (ns) in trace-local time")
+    ("print-end-ns", po::bool_switch(&print_end_ns), "print end time (ns) in trace-local time")
     ("select-nodes", po::value<std::vector<size_t>>()->multitoken(), "limit selection to given nodes (indexing based on internal node numbering, [0, N[)")
   ;
   posDesc.add("trace", -1);
@@ -82,6 +86,14 @@ main(int argc, char* argv[]) {
 
   if(print_node_count) {
     cout << tracefile.node_count() << endl;
+  }
+
+  if(print_start_ns) {
+    cout << tracefile.trace_internal_begin_time_ns() << endl;
+  }
+
+  if(print_end_ns) {
+    cout << tracefile.trace_internal_end_time_ns() << endl;
   }
 
   if(print_summary) {

@@ -65,6 +65,8 @@ class tracefile {
                                                                  _begin_time)
       .count();
   }
+  int64_t trace_internal_begin_time_ns() const { return _begin_time_ns; };
+  int64_t trace_internal_end_time_ns() const { return _end_time_ns; };
 
   size_t node_count() const { return _nodes.size(); }
 
@@ -126,5 +128,7 @@ class tracefile {
 
   time_point _begin_time;
   time_point _end_time;
+  int64_t _begin_time_ns;
+  int64_t _end_time_ns;
 };
 }

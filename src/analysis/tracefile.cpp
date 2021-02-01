@@ -192,6 +192,9 @@ tracefile::calculate_beginAndEndTime() {
     }
   }
 
+  _begin_time_ns = begin_ns;
+  _end_time_ns = end_ns;
+
   // Convert into time points.
   _begin_time =
     time_point(std::chrono::seconds(_header->seconds_since_epoch_on_start) +
