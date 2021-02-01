@@ -25,7 +25,7 @@ class tracefile {
   public:
   using event_definition_vector = definition::event_definition_vector;
 
-  tracefile(const std::string& path);
+  tracefile(const std::string& path, bool force_causal_sync = false);
   ~tracefile();
 
   void print_summary();

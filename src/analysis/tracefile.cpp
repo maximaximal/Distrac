@@ -22,7 +22,7 @@ using std::cout;
 using std::endl;
 
 namespace distrac {
-tracefile::tracefile(const std::string& path)
+  tracefile::tracefile(const std::string& path, bool force_causal_sync)
   : _path(path)
   , _definition("unnamed", "Parsed from tracefile " + path) {
   _sink.open(path);
@@ -39,7 +39,7 @@ tracefile::tracefile(const std::string& path)
   }
 
   scan();
-  if(requiresOffsetRecalculation()) {
+  if(requiresOffsetRecalculation() || force_causal_sync) {
     calculate_offsets();
   }
   calculate_beginAndEndTime();

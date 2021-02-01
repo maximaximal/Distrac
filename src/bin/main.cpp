@@ -27,6 +27,7 @@ main(int argc, char* argv[]) {
   bool print_summary = true;
   bool print_node_count = true;
   bool omit_csv_header = false;
+  bool force_causal_sync = false;
 
   po::variables_map vm;
   po::options_description desc("Allowed options");
@@ -36,6 +37,7 @@ main(int argc, char* argv[]) {
   desc.add_options()
     ("help", "produce help message")
     ("trace", po::value<std::string>(), "input file for tracing")
+    ("force-causal-sync", po::bool_switch(&force_causal_sync), "force synchronizing causal relations")
     ("omit-csv-header", po::bool_switch(&omit_csv_header), "omit the header of CSV output")
     ("print-summary,s", po::bool_switch(&print_summary), "print summary of tracefile")
     ("print-event,e", po::value<std::vector<std::string>>()->multitoken(), "print all occurences of given event names")
@@ -76,7 +78,7 @@ main(int argc, char* argv[]) {
     return EXIT_FAILURE;
   }
 
-  distrac::tracefile tracefile(trace);
+  distrac::tracefile tracefile(trace, force_causal_sync);
 
   if(print_node_count) {
     cout << tracefile.node_count() << endl;
