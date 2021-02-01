@@ -70,7 +70,7 @@ entrymatcher::run() {
         // The dependency is AFTER the event that would depend on it! Offset
         // must be applied to the node the event was found in.
         auto& off = offsets[ev.node().tracefile_location_index()];
-        off = std::min(off, ev.timestamp() - 1 - memoryIt->second);
+        off = std::min(off, memoryIt->second - ev.timestamp() - 1);
       }
 
       memory.erase(memoryIt);
