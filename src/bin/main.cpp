@@ -31,6 +31,8 @@ main(int argc, char* argv[]) {
   bool omit_csv_header = false;
   bool force_causal_sync = false;
 
+  uint64_t time_divide = 0;
+
   po::variables_map vm;
   po::options_description desc("Allowed options");
   try {
@@ -41,6 +43,7 @@ main(int argc, char* argv[]) {
     ("trace", po::value<std::string>(), "input file for tracing")
     ("force-causal-sync", po::bool_switch(&force_causal_sync), "force synchronizing causal relations")
     ("omit-csv-header", po::bool_switch(&omit_csv_header), "omit the header of CSV output")
+    ("time-divide", po::value<uint64_t>(&time_divide)->default_value(0), "divide output into sections of time as provided. 0 means no sub-division")
     ("print-summary,s", po::bool_switch(&print_summary), "print summary of tracefile")
     ("print-event,e", po::value<std::vector<std::string>>()->multitoken(), "print all occurences of given event names")
     ("print-node-count", po::bool_switch(&print_node_count), "print node count")
@@ -114,6 +117,9 @@ main(int argc, char* argv[]) {
     }
   }
 
+  int64_t last_ev_time = 0;
+  uint64_t current_time_delta = 0;
+
   if(vm.count("print-event")) {
     std::vector<std::string> event_names =
       vm["print-event"].as<std::vector<std::string>>();
@@ -129,10 +135,13 @@ main(int argc, char* argv[]) {
       event_filter.insert(event_id);
     }
 
-    bool first = !omit_csv_header;
+    bool first = true;
     for(const auto& ev : tracefile.filtered(event_filter)) {
       if(first) {
-        ev.csv_header_out(std::cout) << endl;
+        if(!omit_csv_header) {
+          ev.csv_header_out(std::cout) << endl;
+        }
+        last_ev_time = ev.timestamp_with_offset();
         first = false;
       }
 
@@ -140,6 +149,19 @@ main(int argc, char* argv[]) {
         if(!selected_nodes.count(ev.node_tracefile_location_index())) {
           continue;
         }
+      }
+
+      // Time Divide
+      if(time_divide > 0) {
+        current_time_delta += ev.timestamp_with_offset() - last_ev_time;
+        if(current_time_delta > time_divide) {
+          std::cout << "TIME_DIVIDE "
+                    << ev.timestamp_with_offset() /
+                         static_cast<float>(time_divide)
+                    << " " << ev.timestamp_with_offset() << std::endl;
+          current_time_delta = 0;
+        }
+        last_ev_time = ev.timestamp_with_offset();
       }
 
       if(event_names.size() > 1) {
