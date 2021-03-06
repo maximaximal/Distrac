@@ -3,6 +3,7 @@
 #include "distrac/types.h"
 
 #include <chrono>
+#include <ctime>
 #include <distrac/analysis/definition.hpp>
 #include <distrac/analysis/entry_matcher.hpp>
 #include <distrac/analysis/event_definition.hpp>
@@ -22,7 +23,7 @@ using std::cout;
 using std::endl;
 
 namespace distrac {
-  tracefile::tracefile(const std::string& path, bool force_causal_sync)
+tracefile::tracefile(const std::string& path, bool force_causal_sync)
   : _path(path)
   , _definition("unnamed", "Parsed from tracefile " + path) {
   _sink.open(path);
@@ -195,13 +196,18 @@ tracefile::calculate_beginAndEndTime() {
   _begin_time_ns = begin_ns;
   _end_time_ns = end_ns;
 
+  std::time_t seconds_since_epoch = _header->seconds_since_epoch_on_start;
+  time_point timepoint_since_epoch =
+    time_point::clock::from_time_t(seconds_since_epoch);
+
+  _begin_time = timepoint_since_epoch;
+  _end_time = timepoint_since_epoch;
+
   // Convert into time points.
-  _begin_time =
-    time_point(std::chrono::seconds(_header->seconds_since_epoch_on_start) +
-               std::chrono::nanoseconds(begin_ns));
-  _end_time =
-    time_point(std::chrono::seconds(_header->seconds_since_epoch_on_start) +
-               std::chrono::nanoseconds(end_ns));
+  _begin_time += std::chrono::duration_cast<decltype(_begin_time)::duration>(
+    std::chrono::nanoseconds(begin_ns));
+  _end_time += std::chrono::duration_cast<decltype(_end_time)::duration>(
+    std::chrono::nanoseconds(end_ns));
 }
 
 bool

@@ -109,6 +109,11 @@ target_include_directories(distrac PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set_property(TARGET distrac PROPERTY POSITION_INDEPENDENT_CODE ON)
 generate_export_header(distrac)
 target_include_directories(distrac PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_link_libraries(distrac PUBLIC Threads::Threads)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
+    target_link_libraries(distrac PUBLIC -lstdthreads)
+endif()
 
 add_library(distrac-analysis SHARED ${DISTRAC_ANALYSIS_SRCS})
 target_link_libraries(distrac-analysis PUBLIC distrac Boost::iostreams)
@@ -120,7 +125,7 @@ add_library(distrac-codegen SHARED ${DISTRAC_CODEGEN_SRCS})
 target_link_libraries(distrac-codegen PUBLIC distrac)
 set_property(TARGET distrac-codegen PROPERTY CXX_STANDARD 17)
 generate_export_header(distrac-codegen)
-target_include_directories(distrac-codegen PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(distrac-codegen PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${Boost_INCLUDE_DIRS})
 
 add_executable(distrac-bin ${DISTRAC_BIN_SRCS})
 set_target_properties(distrac-bin

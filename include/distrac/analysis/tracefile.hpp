@@ -6,15 +6,15 @@
 #include <string>
 #include <vector>
 
-#include <boost/iostreams/device/mapped_file.hpp>
-#include <boost/type_index.hpp>
-
 #include "node.hpp"
 
 #include "distrac/distrac.h"
 #include "distrac/headers.h"
 
 #include "distrac/analysis/definition.hpp"
+
+#include <boost/iostreams/device/mapped_file.hpp>
+#include <boost/type_index.hpp>
 
 namespace distrac {
 

@@ -7,7 +7,15 @@
 #include <string.h>
 #include <time.h>
 
+#ifdef __FreeBSD__
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#endif
+
+#ifdef __linux__
 #include <sys/sendfile.h>
+#endif
 
 #include <distrac/distrac.h>
 #include <distrac/types.h>
@@ -75,10 +83,19 @@ append_file(FILE* src, FILE* tgt) {
 
   off_t bytes_sent = 0;
 
+#ifdef __FreeBSD__
+  while(bytes_sent < src_size) {
+    int status = sendfile(
+      src_fileno, tgt_fileno, bytes_sent, src_size, NULL, &bytes_sent, 0);
+    assert(status == 0);
+  }
+#endif
+#ifdef __linux__
   while(bytes_sent < src_size) {
     ssize_t sent = sendfile(tgt_fileno, src_fileno, &bytes_sent, src_size);
     assert(sent > 0);
   }
+#endif
 }
 
 static void
