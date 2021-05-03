@@ -1,8 +1,14 @@
 # Distrac: A High-Performance Distributed Event-Based Tracing Tool
 
-Work in progress.
+## Current State
 
-## License
+The library is already working for small projects. One example
+is [Paracooba](https://github.com/maximaximal/Paracooba). This also includes
+an [example definition file](https://github.com/maximaximal/Paracooba/blob/master/Paracooba.distracdef).
 
-Dual-Licensed as [AGPL-3.0](https://www.gnu.org/licenses/agpl-3.0.html) and unlimited
-usage licenses to projects or organizations on request.
+## Future Goals
+
+  - Refine saving traces to be thread-local and done in-memory.
+  - Better causal-link-recovery using possibly a SMT solver
+  - Improved analysis possibilities
+  - Automatic network syncing
