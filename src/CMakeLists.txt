@@ -27,6 +27,10 @@ set(DISTRAC_ANALYSIS_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/analysis/entry_matcher.cpp
     PARENT_SCOPE)
 
+set(DISTRAC_ANALYSIS_TEST_SRCS
+    ${CMAKE_CURRENT_SOURCE_DIR}/analysis/test_entry_matcher.cpp
+    PARENT_SCOPE)
+
 set(DISTRAC_CODEGEN_BIN_SRCS
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen-bin/codegen_main.cpp
     PARENT_SCOPE)

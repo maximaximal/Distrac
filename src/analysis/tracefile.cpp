@@ -107,7 +107,8 @@ tracefile::scan() {
 
   if(_header->distrac_trace_file_signature_bytes != DISTRAC_FILE_SIGNATURE) {
     std::cerr
-      << "!! File does not have distrac file signature bytes at the beginning!"
+      << "!! File \"" << _path
+      << "\" does not have distrac file signature bytes at the beginning!"
       << std::endl;
 
     exit(EXIT_FAILURE);
@@ -169,6 +170,9 @@ tracefile::calculate_offsets() {
   }
 
   for(std::size_t i = 0; i < _nodes.size(); ++i) {
+    // Debug Output
+    // std::cout << "Offset for node " << i << " was " << _nodes[i].offset()
+    //           << " and now is " << offsets[i] << std::endl;
     _nodes[i].set_offset(offsets[i]);
   }
 

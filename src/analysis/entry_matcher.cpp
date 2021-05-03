@@ -79,7 +79,7 @@ entrymatcher::run() {
     }
 
     if(i % 5000 == 0) {
-      std::clog << "  " << ((float)i / event_count)
+      std::clog << "  " << ((float)i / event_count) * 100
                 << "% analyzed of dependency " << depevent.name() << " of "
                 << _ev_def.name() << ". Memory has " << memory.size()
                 << " entries." << std::endl;

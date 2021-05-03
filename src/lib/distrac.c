@@ -272,7 +272,7 @@ distrac_current_time(distrac_handle* handle) {
 }
 
 DISTRAC_EXPORT int64_t
-distrac_push(distrac_handle* handle, void* event, uint8_t event_type) {
+distrac_push(distrac_handle* handle, const void* event, uint8_t event_type) {
   assert(handle);
   assert(handle->internal);
   assert(event);
@@ -286,6 +286,19 @@ distrac_push(distrac_handle* handle, void* event, uint8_t event_type) {
   int64_t ns_diff =
     compute_time_diff_ns(handle->internal->init_time, current_time);
 
+  distrac_push_with_timestamp(handle, event, event_type, ns_diff);
+  return ns_diff;
+}
+
+DISTRAC_EXPORT void
+distrac_push_with_timestamp(distrac_handle* handle,
+                            const void* event,
+                            uint8_t event_type,
+                            uint64_t timestamp) {
+  assert(handle);
+  assert(handle->internal);
+  assert(event);
+
   distrac_definition* def = &handle->definition;
   distrac_event* ev_def = &def->events[event_type];
 
@@ -296,12 +309,10 @@ distrac_push(distrac_handle* handle, void* event, uint8_t event_type) {
 
   ++ev_def->count;
   fwrite(
-    &ns_diff, sizeof(int64_t), 1, handle->internal->output_files[event_type]);
+    &timestamp, sizeof(int64_t), 1, handle->internal->output_files[event_type]);
   fwrite(event, event_size, 1, handle->internal->output_files[event_type]);
 
   mtx_unlock(&handle->internal->writer_mtx);
-
-  return ns_diff;
 }
 
 DISTRAC_EXPORT void

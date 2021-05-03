@@ -41,7 +41,13 @@ int64_t
 distrac_current_time(distrac_handle* handle);
 
 int64_t
-distrac_push(distrac_handle* handle, void* event, uint8_t event_type);
+distrac_push(distrac_handle* handle, const void* event, uint8_t event_type);
+
+void
+distrac_push_with_timestamp(distrac_handle* handle,
+                            const void* event,
+                            uint8_t event_type,
+                            uint64_t timestamp);
 
 void
 distrac_finalize(distrac_handle* handle, int64_t offset_ns);

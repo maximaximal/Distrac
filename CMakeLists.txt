@@ -146,6 +146,12 @@ if(DISTRAC_PROJECT)
 
         set(distrac_test_libs ${distrac_test_libs} distrac_lib_test CACHE INTERNAL "Libraries for Tests")
 
+        add_library(distrac_analysis_test SHARED ${DISTRAC_ANALYSIS_TEST_SRCS})
+        set_property(TARGET distrac_analysis_test PROPERTY CXX_STANDARD 17)
+        target_link_libraries(distrac_analysis_test PUBLIC distrac distrac-analysis Catch2::Catch2)
+
+        set(distrac_test_libs ${distrac_test_libs} distrac_analysis_test CACHE INTERNAL "Libraries for Tests")
+
         add_subdirectory(test)
     endif()
 endif()
