@@ -66,7 +66,7 @@ entrymatcher::run() {
     if(memoryIt != memory.end()) {
       if(ev.id() == _ev_def.id()) {
         // Nothing else to do, as this event is already after its dependency.
-      } else {
+      } else if(ev.node().is_main_node()) {
         // The dependency is AFTER the event that would depend on it! Offset
         // must be applied to the node the event was found in.
         auto& off = offsets[ev.node().tracefile_location_index()];

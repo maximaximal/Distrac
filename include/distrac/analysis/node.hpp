@@ -25,6 +25,7 @@ class node {
   const std::string& program() const { return _program; }
   const distrac_version& version() const { return _distrac_verion; }
   int64_t offset_ns() const { return _offset_ns; }
+  bool is_main_node() const { return tracefile_location_index() == 0; }
 
   size_t following_size() const { return _following_size; }
 
