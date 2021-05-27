@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #define DISTRAC_PARAC_PATH_MAX_LENGTH 58
+#define DISTRAC_PARAC_PATH_STR_LENGTH 59
 #define DISTRAC_PARAC_PATH_EXPLICITLY_UNKNOWN 0b00111110u
 #define DISTRAC_PARAC_PATH_PARSER 0b00111101u
 #define DISTRAC_PARAC_PATH_BITS 58u
@@ -97,7 +98,7 @@ operator<<(std::ostream& o, const distrac_ipv6& ipv6) {
 
 inline std::ostream&
 operator<<(std::ostream& o, const distrac_parac_path p) {
-  char out_str[64];
+  char out_str[DISTRAC_PARAC_PATH_STR_LENGTH];
   distrac_parac_path_to_str(p, out_str);
   return o << out_str;
 }
