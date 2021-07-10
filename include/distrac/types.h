@@ -78,9 +78,9 @@ distrac_type_required_padding(enum distrac_type type);
 inline std::ostream&
 operator<<(std::ostream& o, const distrac_ipv4& ipv4) {
   return o << static_cast<int>(ipv4.segments[0]) << "."
-           << static_cast<int>(ipv4.segments[0]) << "."
-           << static_cast<int>(ipv4.segments[0]) << "."
-           << static_cast<int>(ipv4.segments[0]);
+           << static_cast<int>(ipv4.segments[1]) << "."
+           << static_cast<int>(ipv4.segments[2]) << "."
+           << static_cast<int>(ipv4.segments[3]);
 }
 
 inline std::ostream&
